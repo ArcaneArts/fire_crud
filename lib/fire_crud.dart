@@ -143,6 +143,20 @@ class FireCrud<T> {
   Future<void> delete(String id) =>
       collection.doc(id).delete().then((value) => _track(deletes: 1));
 
+  Future<T> getCached(String id) => collection
+          .doc(id)
+          .get(
+            const GetOptions(source: Source.cache),
+          )
+          .catchError((e, es) => collection.doc(id).get())
+          .then((value) {
+        _track(read: value);
+        return fromMap(
+            value.id,
+            value.data() ??
+                (emptyObject == null ? {} : toMap(emptyObject as T)));
+      });
+
   Future<T> get(String id) => collection.doc(id).get().then((value) {
         _track(read: value);
         return fromMap(
@@ -201,6 +215,21 @@ class FireCrud<T> {
         _track(writes: 1);
         return value;
       });
+
+  Future<void> txn(String id, T Function(T data) write) =>
+      FirebaseFirestore.instance
+          .runTransaction((transaction) => transaction
+              .get(collection.doc(id))
+              .then((value) => fromMap(
+                  value.id,
+                  value.data() ??
+                      (emptyObject == null ? {} : toMap(emptyObject as T))))
+              .then((value) =>
+                  transaction.set(collection.doc(id), toMap(write(value)))))
+          .then((value) => _track(
+                reads: 1,
+                writes: 1,
+              ));
 
   Future<void> set(String id, T data) =>
       collection.doc(id).set(toMap(data)).then((value) {
