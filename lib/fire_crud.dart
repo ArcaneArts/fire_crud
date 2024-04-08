@@ -2,6 +2,7 @@ library fire_crud;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection_walker/collection_walker.dart';
+import 'package:flutter/material.dart';
 
 double kFireCrudCostPerRead = 0.0345 / 100000.0;
 double kFireCrudCostPerWrite = 0.1042 / 100000.0;
@@ -73,6 +74,30 @@ class FireCrud<T> {
     usageTracker
         ?.call(FireCrudEvent(reads: reads, writes: writes, deletes: deletes));
   }
+
+  Widget streamBuilder({
+    Query<Map<String, dynamic>> Function(
+      CollectionReference<Map<String, dynamic>> collection,
+    )? query,
+    required Widget Function(BuildContext context, T data) builder,
+    bool shrinkWrap = false,
+    ScrollPhysics? physics,
+    Widget Function(BuildContext context)? loading,
+    Widget Function(BuildContext context)? empty,
+  }) =>
+      StreamBuilder<Iterable<T>>(
+          stream: streamAll(query: query),
+          builder: (context, snap) => snap.hasData
+              ? snap.data!.isEmpty
+                  ? (empty?.call(context) ?? Container())
+                  : ListView.builder(
+                      itemCount: snap.data!.length,
+                      itemBuilder: (context, index) =>
+                          builder(context, snap.data!.elementAt(index)),
+                      shrinkWrap: shrinkWrap,
+                      physics: physics,
+                    )
+              : (loading?.call(context) ?? Container()));
 
   Stream<Iterable<T>> streamAll({
     Query<Map<String, dynamic>> Function(
