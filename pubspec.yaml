@@ -10,5 +10,9 @@ dependencies:
     sdk: flutter
   cloud_firestore: '>=4.0.0 <5.0.0'
   collection_walker: '>=1.1.0 <2.0.0'
+  toxic: '>=1.2.0 <2.0.0'
+  rxdart: ^0.27.7
 dev_dependencies:
   flutter_lints: ^3.0.2
+scripts:
+  update_json_models_force: flutter pub run build_runner build --delete-conflicting-outputs
