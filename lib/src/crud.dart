@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection_walker/collection_walker.dart';
 import 'package:fire_crud/fire_crud.dart';
-import 'package:fire_crud/src/collection_view.dart';
 import 'package:flutter/material.dart';
 
 typedef QueryBuilder = Query<Map<String, dynamic>> Function(
@@ -67,6 +66,26 @@ class FireCrud<T> {
     usageTracker
         ?.call(FireCrudEvent(reads: reads, writes: writes, deletes: deletes));
   }
+
+  CollectionViewer<T> view({
+    QueryBuilder? query,
+    Duration sizeCheckInterval = const Duration(seconds: 30),
+    Duration streamRetargetCooldown = const Duration(seconds: 3),
+    int streamWindow = 50,
+    int streamWindowPadding = 9,
+    int memorySize = 256,
+    int limitedSizeDoubleCheckCountThreshold = 10000,
+  }) =>
+      CollectionViewer(
+          crud: this,
+          query: query,
+          limitedSizeDoubleCheckCountThreshold:
+              limitedSizeDoubleCheckCountThreshold,
+          memorySize: memorySize,
+          sizeCheckInterval: sizeCheckInterval,
+          streamRetargetCooldown: streamRetargetCooldown,
+          streamWindow: streamWindow,
+          streamWindowPadding: streamWindowPadding);
 
   Widget streamBuilder({
     QueryBuilder? query,

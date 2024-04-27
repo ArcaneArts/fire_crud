@@ -54,6 +54,22 @@ class MyCrud {
       );
 }
 ```
+## Stream Large Lists Efficiently
+```dart
+Scaffold(
+  body: FireList<Person>(
+    crud: MyCrud.people,
+    builder: (context, person) => PersonTile(person),
+
+    // Below are typical options but are all optional
+    query: (q) => q.where("age", isGreaterThan: 18), // only adults
+    loading: ListTile();
+    failed: SizedBox.shrink(),
+    physics: BouncingScrollPhysics(),
+  )
+)
+```
+
 ## Single Document Operations
 You can manage individual documents using the following methods
 
