@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection_walker/collection_walker.dart';
 import 'package:fire_crud/fire_crud.dart';
+import 'package:fire_crud/src/collection_view.dart';
 import 'package:flutter/material.dart';
+
+typedef QueryBuilder = Query<Map<String, dynamic>> Function(
+  CollectionReference<Map<String, dynamic>> collection,
+);
 
 class FireCrud<T> {
   final CollectionReference<Map<String, dynamic>> collection;
@@ -64,9 +69,7 @@ class FireCrud<T> {
   }
 
   Widget streamBuilder({
-    Query<Map<String, dynamic>> Function(
-      CollectionReference<Map<String, dynamic>> collection,
-    )? query,
+    QueryBuilder? query,
     required Widget Function(BuildContext context, T data) builder,
     bool shrinkWrap = false,
     ScrollPhysics? physics,
@@ -88,37 +91,31 @@ class FireCrud<T> {
               : (loading?.call(context) ?? Container()));
 
   Stream<Iterable<T>> streamAll({
-    Query<Map<String, dynamic>> Function(
-      CollectionReference<Map<String, dynamic>> collection,
-    )? query,
+    QueryBuilder? query,
   }) =>
       _share(
-          _q(query).snapshots().map((event) {
+          applyQueryBuilder(query).snapshots().map((event) {
             _track(readObjects: event.docs);
             return event.docs.map((e) => fromMap(e.id, e.data()));
           }),
           col: collection,
-          q: _q(query));
+          q: applyQueryBuilder(query));
 
   Future<Iterable<T>> getAll({
-    Query<Map<String, dynamic>> Function(
-      CollectionReference<Map<String, dynamic>> collection,
-    )? query,
+    QueryBuilder? query,
   }) =>
-      _q(query).get().then((value) {
+      applyQueryBuilder(query).get().then((value) {
         _track(readObjects: value.docs);
         return value.docs.map((e) => fromMap(e.id, e.data()));
       });
 
   CollectionWalker<T> walk({
-    Query<Map<String, dynamic>> Function(
-      CollectionReference<Map<String, dynamic>> collection,
-    )? query,
+    QueryBuilder? query,
     CollectionBatchListener? batchListener,
     int chunkSize = 50,
   }) =>
       CollectionWalker(
-          query: _q(query),
+          query: applyQueryBuilder(query),
           chunkSize: chunkSize,
           batchListener: (batch) {
             _track(readObjects: batch);
@@ -148,18 +145,17 @@ class FireCrud<T> {
                 (emptyObject == null ? {} : toMap(emptyObject as T)));
       });
 
-  Future<T> get(String id) => collection.doc(id).get().then((value) {
+  Future<DocumentSnapshot<Map<String, dynamic>>> getRaw(String id) =>
+      collection.doc(id).get().then((value) {
         _track(read: value);
-        return fromMap(
-            value.id,
-            value.data() ??
-                (emptyObject == null ? {} : toMap(emptyObject as T)));
+        return value;
       });
 
-  Future<T?> getOrNull(String id) => collection.doc(id).get().then((value) {
-        _track(read: value);
-        return value.exists ? fromMap(value.id, value.data()!) : null;
-      });
+  Future<T> get(String id) => getRaw(id).then((value) => fromMap(value.id,
+      value.data() ?? (emptyObject == null ? {} : toMap(emptyObject as T))));
+
+  Future<T?> getOrNull(String id) => getRaw(id)
+      .then((value) => value.exists ? fromMap(value.id, value.data()!) : null);
 
   Stream<T?> streamOrNull(String id) => _share(
         collection.doc(id).snapshots().map((value) {
@@ -222,18 +218,13 @@ class FireCrud<T> {
         return value;
       });
 
-  Query<Map<String, dynamic>> _q(
-          Query<Map<String, dynamic>> Function(
-            CollectionReference<Map<String, dynamic>> collection,
-          )? query) =>
+  Query<Map<String, dynamic>> applyQueryBuilder(QueryBuilder? query) =>
       query?.call(collection) ?? collection;
 
   Future<int> count({
-    Query<Map<String, dynamic>> Function(
-      CollectionReference<Map<String, dynamic>> collection,
-    )? query,
+    QueryBuilder? query,
   }) =>
-      _q(query).count().get().then((value) {
+      applyQueryBuilder(query).count().get().then((value) {
         _track(aggregation: value.count ?? 0);
 
         return value.count ?? 0;
