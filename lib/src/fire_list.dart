@@ -16,6 +16,7 @@ class FireList<T> extends StatefulWidget {
   final Widget Function(BuildContext context, T data) builder;
   final Widget loading;
   final Widget failed;
+  final Widget empty;
   final Function(CollectionViewer<T>)? onViewerInit;
   final ScrollController? controller;
   final EdgeInsetsGeometry? padding;
@@ -42,6 +43,7 @@ class FireList<T> extends StatefulWidget {
       {super.key,
       required this.crud,
       required this.builder,
+      this.empty = const SizedBox.shrink(),
       this.padding,
       this.reverse = false,
       this.addAutomaticKeepAlives = true,
@@ -102,32 +104,34 @@ class _FireListState<T> extends State<FireList<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => viewer.stream.build((viewer) => viewer
-      .getSize()
-      .build((size) => ListView.builder(
-          controller: widget.controller,
-          padding: widget.padding,
-          reverse: widget.reverse,
-          addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-          addRepaintBoundaries: widget.addRepaintBoundaries,
-          addSemanticIndexes: widget.addSemanticIndexes,
-          cacheExtent: widget.cacheExtent,
-          clipBehavior: widget.clipBehavior,
-          dragStartBehavior: widget.dragStartBehavior,
-          findChildIndexCallback: widget.findChildIndexCallback,
-          itemExtent: widget.itemExtent,
-          itemExtentBuilder: widget.itemExtentBuilder,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
-          physics: widget.physics,
-          primary: widget.primary,
-          prototypeItem: widget.prototypeItem,
-          restorationId: widget.restorationId,
-          scrollDirection: widget.scrollDirection,
-          semanticChildCount: widget.semanticChildCount,
-          shrinkWrap: widget.shrinkWrap,
-          itemCount: size,
-          itemBuilder: (context, index) => viewer.getAt(index).build(
-              (item) =>
-                  item == null ? widget.failed : widget.builder(context, item),
-              loading: widget.loading))));
+  Widget build(BuildContext context) =>
+      viewer.stream.build((viewer) => viewer.getSize().build((size) => size == 0
+          ? widget.empty
+          : ListView.builder(
+              controller: widget.controller,
+              padding: widget.padding,
+              reverse: widget.reverse,
+              addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+              addRepaintBoundaries: widget.addRepaintBoundaries,
+              addSemanticIndexes: widget.addSemanticIndexes,
+              cacheExtent: widget.cacheExtent,
+              clipBehavior: widget.clipBehavior,
+              dragStartBehavior: widget.dragStartBehavior,
+              findChildIndexCallback: widget.findChildIndexCallback,
+              itemExtent: widget.itemExtent,
+              itemExtentBuilder: widget.itemExtentBuilder,
+              keyboardDismissBehavior: widget.keyboardDismissBehavior,
+              physics: widget.physics,
+              primary: widget.primary,
+              prototypeItem: widget.prototypeItem,
+              restorationId: widget.restorationId,
+              scrollDirection: widget.scrollDirection,
+              semanticChildCount: widget.semanticChildCount,
+              shrinkWrap: widget.shrinkWrap,
+              itemCount: size,
+              itemBuilder: (context, index) => viewer.getAt(index).build(
+                  (item) => item == null
+                      ? widget.failed
+                      : widget.builder(context, item),
+                  loading: widget.loading))));
 }

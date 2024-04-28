@@ -34,6 +34,8 @@ class FireCrud<T> {
               .getListener()
           : firestore;
 
+  T get blank => emptyObject!;
+
   void _track(
       {List<DocumentSnapshot<Map<String, dynamic>>>? readObjects,
       int reads = 0,

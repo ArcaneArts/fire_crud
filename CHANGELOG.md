@@ -1,3 +1,8 @@
+## 1.1.2
+
+* Empty widget for FireLists
+* Blank object getter in crud (define emptyObject to use)
+
 ## 1.1.1
 
 * Remove logging calls in fire lists
