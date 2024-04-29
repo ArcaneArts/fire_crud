@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fire_crud/fire_crud.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:throttled/throttled.dart';
@@ -13,6 +14,7 @@ typedef DocRef = DocumentReference<Map<String, dynamic>>;
 typedef _Q = Query<Map<String, dynamic>>;
 typedef _QStream = Stream<QuerySnapshot<Map<String, dynamic>>>;
 typedef _QSub = StreamSubscription<QuerySnapshot<Map<String, dynamic>>>;
+bool kCollectionViewerDebug = false;
 
 class CollectionViewer<T> {
   final FireCrud<T> crud;
@@ -26,6 +28,7 @@ class CollectionViewer<T> {
   final int limitedSizeDoubleCheckCountThreshold;
   final BehaviorSubject<CollectionViewer<T>> stream = BehaviorSubject();
   final Lock lock = Lock();
+  StreamSubscription<bool>? _emptyListener;
   int _lastIndex = 0;
   int? _cacheSize;
   _QStream? _windowStream;
@@ -127,6 +130,20 @@ class CollectionViewer<T> {
           capture(start + g++, i);
         }
 
+        bool sizeChange = false;
+        for (DocumentChange i in event.docChanges) {
+          if (i.type == DocumentChangeType.removed) {
+            _indexCache.removeWhere((key, value) => value.id == i.doc.id);
+            sizeChange = true;
+          } else if (i.type == DocumentChangeType.added) {
+            sizeChange = true;
+          }
+        }
+
+        if (sizeChange) {
+          clear();
+        }
+
         _onWindowUpdate();
       });
 
@@ -144,6 +161,7 @@ class CollectionViewer<T> {
     _lastIndex = 0;
     _indexCache.clear();
     await getAt(_lastIndex);
+    _cacheSize = null;
     updateStreamWindow();
   }
 
@@ -224,7 +242,11 @@ class CollectionViewer<T> {
   }
 
   void _log(String s) {
-    // print("[${runtimeType.toString()}]: $s");
+    if (kCollectionViewerDebug) {
+      if (kDebugMode) {
+        print("[${runtimeType.toString()}]: $s");
+      }
+    }
   }
 
   Future<int> getSize() async {
@@ -233,6 +255,25 @@ class CollectionViewer<T> {
         .get()
         .then((value) => value.count ?? 0)
         .thenRun((v) => _log("Size Captured: $v"));
+
+    if (_cacheSize != null && _cacheSize! < 1) {
+      _lastIndex = 0;
+      _indexCache.clear();
+
+      _emptyListener ??= _q
+          .limit(1)
+          .snapshots()
+          .map((event) => event.docs.isNotEmpty)
+          .listen((event) {
+        if (event) {
+          _cacheSize = null;
+          _emptyListener?.cancel();
+          _emptyListener = null;
+          _onWindowUpdate();
+        }
+      });
+    }
+
     return _cacheSize!;
   }
 

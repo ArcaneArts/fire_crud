@@ -1,3 +1,17 @@
+## 1.1.7
+
+* Logging for collection viewers
+* Dump cache on size changes
+
+## 1.1.6
+
+* Fix collection viewers not updating when becoming empty
+
+## 1.1.5
+
+* Attempt to fix collection viewers not updating when already empty
+* Added FireSliverList<T> variant of FireList<T>
+
 ## 1.1.4
 
 * Fire Grids fixed
