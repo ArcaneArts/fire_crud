@@ -1,3 +1,12 @@
+## 1.1.4
+
+* Fire Grids fixed
+
+## 1.1.3
+
+* Fire Grids
+
+
 ## 1.1.2
 
 * Empty widget for FireLists
