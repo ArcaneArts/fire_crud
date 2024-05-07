@@ -38,9 +38,13 @@ class FireList<T> extends StatefulWidget {
   final bool? primary;
   final Widget? prototypeItem;
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+  final Widget filtered;
+  final bool Function(T item)? filter;
 
   const FireList(
       {super.key,
+      this.filtered = const SizedBox.shrink(),
+      this.filter,
       required this.crud,
       required this.builder,
       this.empty = const SizedBox.shrink(),
@@ -132,7 +136,9 @@ class _FireListState<T> extends State<FireList<T>> {
               itemBuilder: (context, index) => viewer.getAt(index).build(
                   (item) => item == null
                       ? widget.failed
-                      : widget.builder(context, item),
+                      : (widget.filter?.call(item) ?? true)
+                          ? widget.builder(context, item)
+                          : widget.filtered,
                   loading: widget.loading))));
 }
 
@@ -159,9 +165,13 @@ class FireSliverList<T> extends StatefulWidget {
   final bool addSemanticIndexes;
   final int? semanticChildCount;
   final ChildIndexGetter? findChildIndexCallback;
+  final Widget filtered;
+  final bool Function(T item)? filter;
 
   const FireSliverList(
       {super.key,
+      this.filtered = const SizedBox.shrink(),
+      this.filter,
       required this.crud,
       required this.builder,
       this.empty = const SizedBox.shrink(),
@@ -220,7 +230,9 @@ class _FireSliverListState<T> extends State<FireSliverList<T>> {
               (context, index) => viewer.getAt(index).build(
                   (item) => item == null
                       ? widget.failed
-                      : widget.builder(context, item),
+                      : (widget.filter?.call(item) ?? true)
+                          ? widget.builder(context, item)
+                          : widget.filtered,
                   loading: widget.loading),
               childCount: size,
               addAutomaticKeepAlives: widget.addAutomaticKeepAlives,

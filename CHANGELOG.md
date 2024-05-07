@@ -1,3 +1,7 @@
+## 1.1.8
+
+* Filter options for FireList, FireSliverSlist, FireGrid
+
 ## 1.1.7
 
 * Logging for collection viewers

@@ -38,9 +38,13 @@ class FireGrid<T> extends StatefulWidget {
   final ScrollPhysics? physics;
   final bool? primary;
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+  final Widget filtered;
+  final bool Function(T item)? filter;
 
   const FireGrid(
       {super.key,
+      this.filtered = const SizedBox.shrink(),
+      this.filter,
       required this.crud,
       required this.builder,
       this.empty = const SizedBox.shrink(),
@@ -130,6 +134,8 @@ class _FireGridState<T> extends State<FireGrid<T>> {
               itemBuilder: (context, index) => viewer.getAt(index).build(
                   (item) => item == null
                       ? widget.failed
-                      : widget.builder(context, item),
+                      : (widget.filter?.call(item) ?? true)
+                          ? widget.builder(context, item)
+                          : widget.filtered,
                   loading: widget.loading))));
 }
