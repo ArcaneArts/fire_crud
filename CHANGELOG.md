@@ -1,3 +1,7 @@
+## 1.1.9
+* Updated Cloud Firestore Constraint to '>=0.27.0 <1.0.0'
+* Updated RXDart Constraint to '>=0.27.0 <1.0.0'
+
 ## 1.1.8
 
 * Filter options for FireList, FireSliverSlist, FireGrid

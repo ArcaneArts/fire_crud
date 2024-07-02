@@ -2,7 +2,8 @@ import 'package:fire_crud/fire_crud.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:toxic/toxic.dart';
+import 'package:toxic_flutter/extensions/future.dart';
+import 'package:toxic_flutter/extensions/stream.dart';
 
 class FireGrid<T> extends StatefulWidget {
   final FireCrud<T> crud;
