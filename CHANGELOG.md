@@ -1,3 +1,15 @@
+## 2.0.5
+* Drop flutter dependency as we dont need it anymore. Now dart can work also.
+
+## 2.0.4
+* Fixes
+
+## 2.0.3
+* Collection Viewers, typically useful for maintaining a live view of a changing window of data in a collection under a query. I.e. the backend of a listview.builder in flutter even.
+
+## 2.0.2
+* Get self ChildModel from ModelCrud
+
 ## 2.0.1
 * Docs
 
