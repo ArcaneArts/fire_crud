@@ -2,255 +2,96 @@ CRUD operations for Firestore
 
 > I have gotten sick and tired of firebases poor mapping system, and tired of having to make something like this but half baked for every project i start. Inf is already boring enough, so lets stop doing so much of it.
 
+# Setup
+This project uses [fire_api](https://pub.dev/packages/fire_api) for the firestore database. You will need to set it up before you can use this package.
+
 ## Features
 
-* Get,Set,Add,Stream,Exists,GetOrSet,Delete,Update documents
-* Get,Stream,Walk collections
-* Track usage & cost
-* Typed documents using your own mappers instead of firebases built in mapper (it gets weird on certain types and is unreliable)
+* Get,Set,Add,Stream,,Delete documents as models
+* Get,Stream,Count,Walk collections
 
 ## Usage
 
-Example Serializable Person class
+1. Define your models
 ```dart
-part 'person.g.dart';
+class User with ModelCrud {
+  String name;
+  int age;
 
-@JsonSerializable()
-class Person {
-  @JsonKey(ignore: true) String? uid; // Optionally track a uid for ease of use in widgets
-  @JsonKey(ignore: true) bool exists = true; // Optionally track if the document exists
-  
-  String? name;
-  int? age;
-  //...
-}
-```
+  // copyWith, toMap, fromMap would be from dart_mappable for example
 
-```dart
-import 'package:fire_crud/fire_crud.dart';
-
-class MyCrud {
-  static FireCrudEvent _usage = FireCrudEvent();
-  
-  static FireCrud<Person> get people =>
-      FireCrud<Person>(
-        // The collection to use
-        collection: FirebaseFirestore.instance.collection("people"),
-        
-        // The mapper to use
-        toMap: (t) => Person.toJson(t),
-        
-        // The reverse mapper to use
-        fromMap: (id, map) => Person.fromJson(map)
-          ..uid = id, // Optionally track a uid for ease of use in widgets
-        
-        // Optionally track usage
-        usageTracker: (event) => _usage += event),
-  
-        // Optionally define an empty object to use when a document is not found
-        // Unless using getOrNull / streamOrNull, stream & get will return a non null
-        // deserialized object with all fields set to null. You can change this default here
-        emptyObject: Person()..exists = false,
-      );
-}
-```
-## Stream Large Lists Efficiently
-```dart
-Scaffold(
-  body: FireList<Person>(
-    crud: MyCrud.people,
-    builder: (context, person) => PersonTile(person),
-
-    // Below are typical options but are all optional
-    query: (q) => q.where("age", isGreaterThan: 18), // only adults
-    loading: ListTile();
-    failed: SizedBox.shrink(),
-    physics: BouncingScrollPhysics(),
-  )
-)
-```
-
-## Single Document Operations
-You can manage individual documents using the following methods
-
-### Add Documents
-```dart
-// Add a document
-String theId = await MyCrud.people
-    .add(Person(name: "Bob", age: 42));
-```
-
-### Get Documents
-```dart
-// Get a document (will use the empty object if not found)
-Person bob = await MyCrud.people
-    .get(theId);
-
-// Get a document or null
-Person? bobOrNull = await MyCrud.people
-    .getOrNull(theId);
-
-// Get a document or just return something else if it doesnt exist
-Person bobOrSomethingElse = await MyCrud.people
-    .getOrReturn(theId, () => Person(name: "Bob", age: 42));
-
-// Get a document or set it if not found
-Person bobOrSet = await MyCrud.people
-    .getOrSet(theId, () => Person(name: "Bob", age: 42));
-```
-
-### Delete Documents
-```dart
-// Delete a document
-await MyCrud.people
-    .delete(theId);
-```
-
-### Update Documents
-```dart
-
-// Update a document
-await MyCrud.people
-    .update(theId, {
-        "age": FieldValue.increment(1),
-    });
-```
-
-### Stream Documents
-```dart
-// Stream a document (will use the empty object if not found)
-Stream<Person> bobStream = MyCrud.people
-    .stream(theId);
-
-// Stream a document or null
-Stream<Person?> bobStreamOrNull = MyCrud.people
-    .streamOrNull(theId);
-
-// Stream a document or just return something else if it doesnt exist
-Stream<Person> bobStreamOrSomethingElse = MyCrud.people
-    .streamOrReturn(theId, () => Person(name: "Bob", age: 42));
-```
-
-## Collection Operations
-You can manage collections using the following methods
-
-Counting using aggregate queries
-```dart
-// Count the number of documents in a collection
-int count = await MyCrud.people
-    .count();
-
-// You can also use a query as a counting filter or limiter
-int count = await MyCrud.people
-    .count({
-        query: (q) => q.where("age", isGreaterThan: 18) // only count adults
-                      .limit(1000), // will use up to one read only
-    });
-```
-
-### Get Collections
-```dart
-// Get all the people
-Iterable<Person> people = await MyCrud.people
-    .getAll();
-
-// Get all the people with a query
-Iterable<Person> people = await MyCrud.people
-    .getAll({
-        query: (q) => q.where("age", isGreaterThan: 18) // only get adults
-                      .limit(100) // will use up to 100 reads,
-    });
-```
-
-### Stream Collections
-```dart
-// Stream all the people
-Stream<Person> peopleStream = MyCrud.people
-    .streamAll();
-
-// Stream all the people with a query
-Stream<Person> peopleStream = MyCrud.people
-    .streamAll({
-        query: (q) => q.where("age", isGreaterThan: 18) // only get adults
-                      .limit(100) // will use up to 100 reads per update,
-    });
-```
-
-### Walk Collections
-See [collection_walker](https://pub.dev/packages/collection_walker) for more info. You may not need to add it unless you are using its types.
-```dart
-CollectionWalker<Person> walker = MyCrud.people
-    .walk({
-        query: (q) => q.where("age", isGreaterThan: 18) // only get adults
-                      .limit(100) // will use up to 100 reads per update,
-        chunkSize: 50 // The default
-    });
-
-// Then in a widget for infinite scrolling recycler list!
-FutureBuilder<int>(
-    future: walker.size(), // cached if it already knows it
-    builder: (_, snap) => !snap.hasData ? ListView() : ListView.builder(
-        itemCount: snap.data,
-        itemBuilder: (_, i) => FutureBuilder<Person>(
-            future: walker.get(i),
-            builder: (_, snap) => !snap.hasData ? const LoadingListTile() : ListTile(
-                title: Text(snap.data!.name),
-                subtitle: Text(snap.data!.age.toString()),
-            ),
-        ),
-    ),
-);
-```
-
-## Subcollections
-Subcollections are actually really easy to deal with
-
-```dart
-import 'package:fire_crud/fire_crud.dart';
-
-class MyCrud {
-  static FireCrudEvent _usage = FireCrudEvent();
-  
-  static FireCrud<Person> get people => ...
-  
-  // Basically just use a method to take in the parent id and return a new crud
-  static FireCrud<Friend> friend(String person) => FireCrud<Person>(
-      // The collection to use
-      collection: FirebaseFirestore.instance.collection("people/$person/friends"),
-
-      // The mapper to use
-      toMap: (t) => Person.toJson(t),
-
-      // The reverse mapper to use
-      fromMap: (id, map) => Person.fromJson(map)
-        ..uid = id, // Optionally track a uid for ease of use in widgets
-
-      // Optionally track usage
-      usageTracker: (event) => _usage += event),
+  @override
+  List<ChildModel> get childModels => [
+    // user/USERID/data/settings
+    ChildModel<Usersettings>(
+        collection: "data",
+        exclusiveDocumentId: "settings",
+        model: UserSettings(), 
+        toMap: (m) => m.toMap(), 
+        fromMap: (m) => UserSettingsMappable.fromMap(m)),
     
-      // Optionally define an empty object to use when a document is not found
-      // Unless using getOrNull / streamOrNull, stream & get will return a non null
-      // deserialized object with all fields set to null. You can change this default here
-      emptyObject: Person()..exists = false,
-  );
+    // user/USERID/note/NOTEID
+    ChildModel<Note>(
+        collection: "note",
+        model: Note(), 
+        toMap: (m) => m.toMap(), 
+        fromMap: (m) => NoteMappable.fromMap(m)),
+  ];
+}
+
+class UserSettings with ModelCrud {
+  bool dark;
+  
+  @override
+  List<ChildModel> get childModels => [];
+}
+
+class Note with ModelCrud {
+  String title;
+  String content;
+  
+  @override
+  List<ChildModel> get childModels => [];
+}
+
+// On init we need to register all root models
+void main(){
+  FireCrud.instance().registerModel(ChildModel<User>(
+    collection: "user",
+    model: User(),
+    toMap: (m) => m.toMap(),
+    fromMap: (m) => UserMappable.fromMap(m)
+  ));
 }
 ```
 
-## Usage Tracking
-You can track usage by passing in a usage tracker to the crud. This will track the number of reads, writes, and deletes. It will also track the number of documents read, written, and deleted. This can be used to track usage and cost.
+2. Use them!
 
 ```dart
-import 'package:fire_crud/fire_crud.dart';
+// Add a user
+User user = await FireCrud.instance().add<User>(User()..name = "Dan" ..age = 21);
 
-final FireCrudEvent _usage = FireCrudEvent();
+// Add a note without getting the user by using .model instead of .pull
+Note added = await FireCrud.instance().model<User>("USERID")
+  .add<Note>(Note()
+      ..title = "My Note"
+      ..content = "This is my note");
 
-// tune your costs. You can modify these fields to match your firestore costs
-// The free tier is ignored this assumes you are paying for every rwd
-void setupCosts(){
-  kFireCrudCostPerRead = 0.0345 / 100000.0;
-  kFireCrudCostPerWrite = 0.1042 / 100000.0;
-  kFireCrudCostPerDelete = 0.0115 / 100000.0;
-}
+// Update a note 
+await user.push<Note>(added..title = "My new note");
 
-double calculateCost() => _usage.cost;
+// Update a note atomically (txn get then set)
+await user.pushAtomic<Note>((now) => now..title = "My new note");
+
+// Select all notes ordered by title
+List<Note> notes = await user.pullAll<Note>(query: (q) => q.orderBy("title"));
+
+// Stream all notes
+Stream<List<Note>> notesStream = user.streamAll<Note>();
+
+// Get neighbor note
+added.parentModel<User>().pull<Note>("another id");
+
+// Delete
+user.delete<Note>("noteID");
 ```

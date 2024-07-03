@@ -1,3 +1,9 @@
+## 2.0.1
+* Docs
+
+## 2.0.0
+* Switched to fire_api
+
 ## 1.1.9
 * Updated Cloud Firestore Constraint to '>=0.27.0 <1.0.0'
 * Updated RXDart Constraint to '>=0.27.0 <1.0.0'

@@ -1,6 +1,6 @@
 name: fire_crud
 description: CRUD Operations for firestore
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/ArcaneArts/fire_crud
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -10,7 +10,3 @@ dependencies:
   collection_walker: '>=2.0.0 <3.0.0'
   toxic: '>=1.2.0 <2.0.0'
   fire_api: '>=1.1.2 <1.2.0'
-dev_dependencies:
-  flutter_lints: ^4.0.0
-scripts:
-  update_json_models_force: flutter pub run build_runner build --delete-conflicting-outputs
