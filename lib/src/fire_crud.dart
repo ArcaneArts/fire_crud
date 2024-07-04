@@ -2,17 +2,19 @@ import 'package:collection_walker/collection_walker.dart';
 import 'package:fire_api/fire_api.dart';
 import 'package:fire_crud/fire_crud.dart';
 
+FireCrud get $crud => FireCrud.instance();
+
 class FireCrud extends ModelAccessor {
   static FireCrud? _instance;
-  Map<Type, ChildModel> typeModels = {};
+  Map<Type, FireModel> typeModels = {};
 
   FireCrud._();
 
   factory FireCrud.instance() => _instance ??= FireCrud._();
 
-  List<ChildModel> models = [];
+  List<FireModel> models = [];
 
-  void registerModel(ChildModel root) {
+  void registerModel(FireModel root) {
     models.add(root);
     typeModels[root.model.runtimeType] = root;
     root.registerTypeModels();
@@ -35,40 +37,61 @@ class FireCrud extends ModelAccessor {
           query);
 
   @override
-  String $pathOf(ChildModel c, [String? id]) =>
+  String $pathOf(FireModel c, [String? id]) =>
       "${c.collection}/${id ?? c.exclusiveDocumentId}";
 
   @override
-  List<ChildModel<ModelCrud>> get $models => models;
+  List<FireModel<ModelCrud>> get $models => models;
 
   @override
-  T model<T extends ModelCrud>([String? id]) =>
+  T model<T extends ModelCrud>(String id) =>
       ModelUtility.model<T>($models, $pathOf, id);
+
+  @override
+  T modelUnique<T extends ModelCrud>() =>
+      ModelUtility.model<T>($models, $pathOf, null);
 
   @override
   T modelInCollection<T extends ModelCrud>(String collection, [String? id]) =>
       ModelUtility.modelInCollection<T>($models, $pathOf, collection, id);
 
   @override
-  Future<T?> pull<T extends ModelCrud>([String? id]) =>
-      ModelUtility.pull<T>($models, $pathOf, id);
+  Future<T> ensureExists<T extends ModelCrud>(String id, T model) async {
+    T? t = await get<T>(id);
+    if (t == null) {
+      await set<T>(id, model);
+      return model;
+    }
+
+    return t;
+  }
 
   @override
-  Future<void> push<T extends ModelCrud>(T model, [String? id]) =>
-      ModelUtility.push<T>($models, $pathOf, model, id);
+  Future<T> ensureExistsUnique<T extends ModelCrud>(T model) async {
+    T? t = await getUnique<T>();
+    if (t == null) {
+      await setUnique<T>(model);
+      return model;
+    }
+
+    return t;
+  }
 
   @override
-  Future<void> delete<T extends ModelCrud>(T model, [String? id]) =>
-      ModelUtility.delete<T>($models, $pathOf, model, id);
+  Future<void> delete<T extends ModelCrud>(String id) =>
+      ModelUtility.delete<T>($models, $pathOf, id);
 
   @override
-  Future<void> pushAtomic<T extends ModelCrud>(T Function(T? data) txn,
-          [String? id]) =>
-      ModelUtility.pushAtomic<T>($models, $pathOf, txn, id);
+  Future<void> deleteUnique<T extends ModelCrud>() =>
+      ModelUtility.delete<T>($models, $pathOf, null);
 
   @override
-  Stream<T> stream<T extends ModelCrud>([String? id]) =>
+  Stream<T?> stream<T extends ModelCrud>(String id) =>
       ModelUtility.stream<T>($models, $pathOf, id);
+
+  @override
+  Stream<T?> streamUnique<T extends ModelCrud>() =>
+      ModelUtility.stream<T>($models, $pathOf, null);
 
   @override
   Future<T> add<T extends ModelCrud>(T model) =>
@@ -104,7 +127,7 @@ class FireCrud extends ModelAccessor {
         segments.length ~/ 2, (i) => (segments[i * 2], segments[i * 2 + 1]));
 
     ModelCrud? crud;
-    for (ChildModel i in $models) {
+    for (FireModel i in $models) {
       if (i.collection == components.first.$1) {
         crud = i.cloneWithPath("${i.collection}/${components.first.$2}");
         components.removeAt(0);
@@ -123,4 +146,29 @@ class FireCrud extends ModelAccessor {
 
     return crud as T;
   }
+
+  @override
+  Future<T?> get<T extends ModelCrud>(String id) =>
+      ModelUtility.pull<T>($models, $pathOf, id);
+
+  @override
+  Future<T?> getUnique<T extends ModelCrud>() =>
+      ModelUtility.pull<T>($models, $pathOf, null);
+
+  @override
+  Future<void> set<T extends ModelCrud>(String id, T model) =>
+      ModelUtility.push<T>($models, $pathOf, model, id);
+
+  @override
+  Future<void> setUnique<T extends ModelCrud>(T model) =>
+      ModelUtility.push<T>($models, $pathOf, model, null);
+
+  @override
+  Future<void> setAtomic<T extends ModelCrud>(
+          String id, T Function(T? data) txn) =>
+      ModelUtility.pushAtomic<T>($models, $pathOf, txn, id);
+
+  @override
+  Future<void> setUniqueAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
+      ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
 }

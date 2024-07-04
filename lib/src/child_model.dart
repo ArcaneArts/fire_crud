@@ -1,6 +1,6 @@
 import 'package:fire_crud/fire_crud.dart';
 
-class ChildModel<T extends ModelCrud> {
+class FireModel<T extends ModelCrud> {
   /// The subCollection that this child is a part of
   final String collection;
 
@@ -18,7 +18,7 @@ class ChildModel<T extends ModelCrud> {
   T? withPath(Map<String, dynamic>? data, String path) =>
       data == null ? null : (fromMap(data)..documentPath = path);
 
-  ChildModel(
+  FireModel(
       {required this.collection,
       required this.model,
       required this.toMap,
@@ -26,7 +26,7 @@ class ChildModel<T extends ModelCrud> {
       this.exclusiveDocumentId});
 
   void registerTypeModels() {
-    for (ChildModel i in model.childModels) {
+    for (FireModel i in model.childModels) {
       FireCrud.instance().typeModels[i.model.runtimeType] = i;
       i.registerTypeModels();
     }

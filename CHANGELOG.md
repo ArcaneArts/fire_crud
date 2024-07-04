@@ -1,3 +1,25 @@
+## 2.1.0
+* **BREAKING** Removed push in favor of set, setUnique
+* **BREAKING** Removed pushAtomic in favor of setAtomic, setUniqueAtomic
+* **BREAKING** Removed pull in favor of get, getUnique
+* **BREAKING** Changed stream([id]) into stream(id) and streamUnique()
+* **BREAKING** Changed delete([id]) into delete(id) and deleteUnique()
+* **BREAKING** Changed model([id]) into model(id) and modelUnique()
+* **BREAKING** Renamed `ChildModel` to `FireModel`
+* Streams of single models return nullable results now
+* Added a quick getter for `FireCrud.instance()` as `$fcrud` global variable
+
+## 2.0.8
+* Added set(id) and setUnique() in favor of now deprecated `push([id?])`
+* Added setAtomic(id) and setUniqueAtomic() in favor of now deprecated `pushAtomic([id?])`
+* Added get(id) and getUnique() in favor of now deprecated `pull([id?])`
+
+## 2.0.7
+* Deletes dont require a model
+
+## 2.0.6
+* Ensure exists method call
+
 ## 2.0.5
 * Drop flutter dependency as we dont need it anymore. Now dart can work also.
 

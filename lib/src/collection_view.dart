@@ -20,7 +20,7 @@ typedef _QSub = StreamSubscription<List<DocumentSnapshot>>;
 bool kCollectionViewerDebug = false;
 
 class CollectionViewer<T extends ModelCrud> {
-  final ChildModel<T> crud;
+  final FireModel<T> crud;
   final QueryBuilder? query;
   final int streamWindow;
   final int streamWindowPadding;
