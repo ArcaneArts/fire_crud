@@ -28,12 +28,18 @@ mixin ModelCrud implements ModelAccessor {
   @override
   CollectionWalker<T> walk<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
-      ModelUtility.walk<T>(parentCollectionPath!, $models, query);
+      ModelUtility.walk<T>(
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          $models,
+          query);
 
   @override
   CollectionViewer<T> view<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
-      ModelUtility.view<T>(parentCollectionPath!, $models, query);
+      ModelUtility.view<T>(
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          $models,
+          query);
 
   @override
   T model<T extends ModelCrud>(String id) =>
@@ -70,17 +76,26 @@ mixin ModelCrud implements ModelAccessor {
   @override
   Future<List<T>> pullAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
-      ModelUtility.pullAll<T>(parentCollectionPath!, $models, query);
+      ModelUtility.pullAll<T>(
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          $models,
+          query);
 
   @override
   Stream<List<T>> streamAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
-      ModelUtility.streamAll<T>(parentCollectionPath!, $models, query);
+      ModelUtility.streamAll<T>(
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          $models,
+          query);
 
   @override
   Future<int> count<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
-      ModelUtility.count<T>(parentCollectionPath!, $models, query);
+      ModelUtility.count<T>(
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          $models,
+          query);
 
   @override
   Future<T> ensureExists<T extends ModelCrud>(String id, T model) async {

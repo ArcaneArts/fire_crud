@@ -36,7 +36,7 @@ class ModelUtility {
       [CollectionReference Function(CollectionReference ref)? query]) {
     FireModel<T> c = selectChildModelCollectionByType(models)!;
     return CollectionViewer<T>(
-      crud: c,
+      crud: c.cloneWithPath("$collectionPath/*"),
       query: query,
     );
   }

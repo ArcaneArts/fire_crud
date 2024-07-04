@@ -19,8 +19,11 @@ typedef _QStream = Stream<List<DocumentSnapshot>>;
 typedef _QSub = StreamSubscription<List<DocumentSnapshot>>;
 bool kCollectionViewerDebug = false;
 
+/// A collection view allows you to view a potentially queried collection as a view. You can stream from sections of the collection (windows) or just get random objects.
+/// Because of how firebase pagination works, you need the previous document to get the next page of data which makes it rather annoying to make a paginator view
+/// The collection viewer does its best to hide this so you can just focus on indexes and not worry about the pagination.
 class CollectionViewer<T extends ModelCrud> {
-  final FireModel<T> crud;
+  final T crud;
   final QueryBuilder? query;
   final int streamWindow;
   final int streamWindowPadding;
@@ -233,7 +236,9 @@ class CollectionViewer<T extends ModelCrud> {
     try {
       DocSnap? r = _indexCache[index];
       r = (r?.exists ?? false) ? r : null;
-      return r != null ? crud.withPath(r.data, r.path) : null;
+      return r != null
+          ? (crud.crud as FireModel<T>).withPath(r.data, r.path)
+          : null;
     } catch (e) {
       return null;
     }
@@ -311,9 +316,9 @@ class CollectionViewer<T extends ModelCrud> {
   }
 
   _Q get _q =>
-      query?.call(FirestoreDatabase.instance
-          .collection(crud.model.parentCollectionPath!)) ??
-      FirestoreDatabase.instance.collection(crud.model.parentCollectionPath!);
+      query?.call(
+          FirestoreDatabase.instance.collection(crud.parentCollectionPath!)) ??
+      FirestoreDatabase.instance.collection(crud.parentCollectionPath!);
 
   bool hasSnapshot(int index) => _indexCache.containsKey(index);
 

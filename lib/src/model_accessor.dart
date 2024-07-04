@@ -7,12 +7,15 @@ abstract class ModelAccessor {
 
   String $pathOf(FireModel c, [String? id]);
 
+  /// Creates a [CollectionWalker] for the given model type which should be a child collection of THIS document.
   CollectionWalker<T> walk<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
 
+  /// Creates a [CollectionViewer] for the given model type which should be a child collection of THIS document.
   CollectionViewer<T> view<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
 
+  /// Gets a child model type in a subcollection of this document. The type determines what the subcollection actually is.
   T model<T extends ModelCrud>(String id);
 
   T modelUnique<T extends ModelCrud>();

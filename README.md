@@ -56,7 +56,7 @@ class Note with ModelCrud {
 
 // On init we need to register all root models
 void main(){
-  FireCrud.instance().registerModel(ChildModel<User>(
+  $crud.registerModel(ChildModel<User>(
     collection: "user",
     model: User(),
     toMap: (m) => m.toMap(),
@@ -69,19 +69,19 @@ void main(){
 
 ```dart
 // Add a user
-User user = await FireCrud.instance().add<User>(User()..name = "Dan" ..age = 21);
+User user = await $crud.add<User>(User()..name = "Dan" ..age = 21);
 
 // Add a note without getting the user by using .model instead of .pull
-Note added = await FireCrud.instance().model<User>("USERID")
+Note added = await $crud.model<User>("USERID")
   .add<Note>(Note()
       ..title = "My Note"
       ..content = "This is my note");
 
 // Update a note 
-await user.push<Note>(added..title = "My new note");
+await user.set<Note>(added..title = "My new note");
 
 // Update a note atomically (txn get then set)
-await user.pushAtomic<Note>((now) => now..title = "My new note");
+await user.setAtomic<Note>((now) => now..title = "My new note");
 
 // Select all notes ordered by title
 List<Note> notes = await user.pullAll<Note>(query: (q) => q.orderBy("title"));
@@ -90,7 +90,7 @@ List<Note> notes = await user.pullAll<Note>(query: (q) => q.orderBy("title"));
 Stream<List<Note>> notesStream = user.streamAll<Note>();
 
 // Get neighbor note
-added.parentModel<User>().pull<Note>("another id");
+added.parentModel<User>().get<Note>("another id");
 
 // Delete
 user.delete<Note>("noteID");

@@ -4,6 +4,7 @@ import 'package:fire_crud/fire_crud.dart';
 
 FireCrud get $crud => FireCrud.instance();
 
+/// A class that provides CRUD operations for Firestore.
 class FireCrud extends ModelAccessor {
   static FireCrud? _instance;
   Map<Type, FireModel> typeModels = {};
