@@ -149,4 +149,24 @@ mixin ModelCrud implements ModelAccessor {
   @override
   Future<void> setUniqueAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
+
+  @override
+  Future<void> setSelf<T extends ModelCrud>(T self) {
+    if (self.runtimeType != runtimeType) {
+      throw Exception("Cannot set self with a different model type");
+    }
+    return FirestoreDatabase.instance
+        .document(documentPath!)
+        .set(crud.toMap(self));
+  }
+
+  @override
+  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
+    if (txn(null).runtimeType != runtimeType) {
+      throw Exception("Cannot set self with a different model type");
+    }
+    return FirestoreDatabase.instance.document(documentPath!).setAtomic(
+        (data) =>
+            crud.toMap(txn(data == null ? null : crud.fromMap(data) as T)));
+  }
 }

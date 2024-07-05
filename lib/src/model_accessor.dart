@@ -30,6 +30,10 @@ abstract class ModelAccessor {
 
   Future<T> ensureExistsUnique<T extends ModelCrud>(T model);
 
+  Future<void> setSelf<T extends ModelCrud>(T self);
+
+  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn);
+
   Future<void> set<T extends ModelCrud>(String id, T model);
 
   Future<void> setAtomic<T extends ModelCrud>(

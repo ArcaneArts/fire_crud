@@ -175,4 +175,14 @@ class FireCrud extends ModelAccessor {
   @override
   Future<void> setUniqueAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
+
+  @override
+  Future<void> setSelf<T extends ModelCrud>(T self) {
+    throw Exception("setSelf is not supported on the root accessor");
+  }
+
+  @override
+  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
+    throw Exception("setSelfAtomic is not supported on the root accessor");
+  }
 }

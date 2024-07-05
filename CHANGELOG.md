@@ -1,3 +1,6 @@
+## 2.1.1
+* Set self & setSelf atomic
+
 ## 2.1.0
 * **BREAKING** Removed push in favor of set, setUnique
 * **BREAKING** Removed pushAtomic in favor of setAtomic, setUniqueAtomic
