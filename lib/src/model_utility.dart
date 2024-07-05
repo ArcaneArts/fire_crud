@@ -7,9 +7,7 @@ class ModelUtility {
   static FireModel<T>? selectChildModel<T extends ModelCrud>(
       List<FireModel> models,
       [String? id]) {
-    FireModel<T>? c = models
-        .whereType<FireModel<T>>()
-        .select((e) => (e.exclusiveDocumentId != null) != (id != null));
+    FireModel<T>? c = models.whereType<FireModel<T>>().firstOrNull;
 
     if (c == null) {
       print("WARNING: No child model found for ChildModel<$T>.");
@@ -119,6 +117,18 @@ class ModelUtility {
         .set(c.toMap(model));
   }
 
+  static Future<T> add<T extends ModelCrud>(
+      String collectionPath,
+      List<FireModel> models,
+      String Function(FireModel c, [String? id]) pathOf,
+      T model) async {
+    FireModel<T> c = selectChildModelCollectionByType(models)!;
+    DocumentReference r = await FirestoreDatabase.instance
+        .collection(collectionPath)
+        .add(c.toMap(model));
+    return c.cloneWithPath(pathOf(c, r.path));
+  }
+
   static Future<void> delete<T extends ModelCrud>(
       List<FireModel> models, String Function(FireModel c, [String? id]) pathOf,
       [String? id]) async {
@@ -144,14 +154,5 @@ class ModelUtility {
         .document(pathOf(c, id))
         .stream
         .map((event) => c.withPath(event.data, event.reference.path));
-  }
-
-  static Future<T> add<T extends ModelCrud>(List<FireModel> models,
-      String Function(FireModel c, [String? id]) pathOf, T model) async {
-    FireModel<T> c = selectChildModel<T>(models)!;
-    DocumentReference r = await FirestoreDatabase.instance
-        .collection(c.collection)
-        .add(c.toMap(model));
-    return c.cloneWithPath(pathOf(c, r.path));
   }
 }

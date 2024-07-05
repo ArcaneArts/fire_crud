@@ -70,8 +70,11 @@ mixin ModelCrud implements ModelAccessor {
       ModelUtility.stream<T>($models, $pathOf, null);
 
   @override
-  Future<T> add<T extends ModelCrud>(T model) =>
-      ModelUtility.add<T>($models, $pathOf, model);
+  Future<T> add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
+      "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+      $models,
+      $pathOf,
+      model);
 
   @override
   Future<List<T>> pullAll<T extends ModelCrud>(
