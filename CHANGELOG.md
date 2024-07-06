@@ -1,3 +1,15 @@
+## 2.1.5
+* deleteSelf
+
+## 2.1.4
+* streamSelf
+
+## 2.1.3
+* pullAll to getAll
+
+## 2.1.2
+* exists & existsUnique
+
 ## 2.1.1
 * Set self & setSelf atomic
 

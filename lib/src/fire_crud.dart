@@ -102,7 +102,7 @@ class FireCrud extends ModelAccessor {
       model);
 
   @override
-  Future<List<T>> pullAll<T extends ModelCrud>(
+  Future<List<T>> getAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.pullAll<T>(
           ModelUtility.selectChildModelCollectionByType($models)!.collection,
@@ -177,6 +177,16 @@ class FireCrud extends ModelAccessor {
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
 
   @override
+  Stream<T> streamSelf<T extends ModelCrud>() {
+    throw Exception("streamSelf is not supported on the root accessor");
+  }
+
+  @override
+  Future<void> deleteSelf<T extends ModelCrud>() {
+    throw Exception("deleteSelf is not supported on the root accessor");
+  }
+
+  @override
   Future<void> setSelf<T extends ModelCrud>(T self) {
     throw Exception("setSelf is not supported on the root accessor");
   }
@@ -185,4 +195,12 @@ class FireCrud extends ModelAccessor {
   Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
     throw Exception("setSelfAtomic is not supported on the root accessor");
   }
+
+  @override
+  Future<bool> exists<T extends ModelCrud>(String id) =>
+      get<T>(id).then((value) => value != null).catchError((e) => false);
+
+  @override
+  Future<bool> existsUnique<T extends ModelCrud>() =>
+      getUnique<T>().then((value) => value != null).catchError((e) => false);
 }

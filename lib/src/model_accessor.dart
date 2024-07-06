@@ -22,6 +22,10 @@ abstract class ModelAccessor {
 
   T modelInCollection<T extends ModelCrud>(String collection, [String? id]);
 
+  Future<bool> exists<T extends ModelCrud>(String id);
+
+  Future<bool> existsUnique<T extends ModelCrud>();
+
   Future<T?> get<T extends ModelCrud>(String id);
 
   Future<T?> getUnique<T extends ModelCrud>();
@@ -35,6 +39,10 @@ abstract class ModelAccessor {
   Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn);
 
   Future<void> set<T extends ModelCrud>(String id, T model);
+
+  Stream<T> streamSelf<T extends ModelCrud>();
+
+  Future<void> deleteSelf<T extends ModelCrud>();
 
   Future<void> setAtomic<T extends ModelCrud>(
       String id, T Function(T? data) txn);
@@ -53,7 +61,7 @@ abstract class ModelAccessor {
 
   Future<T> add<T extends ModelCrud>(T model);
 
-  Future<List<T>> pullAll<T extends ModelCrud>(
+  Future<List<T>> getAll<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
 
   Stream<List<T>> streamAll<T extends ModelCrud>(

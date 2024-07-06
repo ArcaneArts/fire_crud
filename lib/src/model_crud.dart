@@ -77,7 +77,7 @@ mixin ModelCrud implements ModelAccessor {
       model);
 
   @override
-  Future<List<T>> pullAll<T extends ModelCrud>(
+  Future<List<T>> getAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.pullAll<T>(
           "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
@@ -159,6 +159,28 @@ mixin ModelCrud implements ModelAccessor {
         .document(documentPath!)
         .set(crud.toMap(self));
   }
+
+  @override
+  Stream<T> streamSelf<T extends ModelCrud>() =>
+      FirestoreDatabase.instance.document(documentPath!).stream.map((event) =>
+          (event.data == null ? this : crud.withPath(event.data, documentPath!))
+              as T);
+
+  @override
+  Future<void> deleteSelf<T extends ModelCrud>() {
+    if (documentPath == null) {
+      throw Exception("Cannot delete self without a document path");
+    }
+    return FirestoreDatabase.instance.document(documentPath!).delete();
+  }
+
+  @override
+  Future<bool> exists<T extends ModelCrud>(String id) =>
+      get<T>(id).then((value) => value != null).catchError((e) => false);
+
+  @override
+  Future<bool> existsUnique<T extends ModelCrud>() =>
+      getUnique<T>().then((value) => value != null).catchError((e) => false);
 
   @override
   Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
