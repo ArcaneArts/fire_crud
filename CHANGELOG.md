@@ -1,3 +1,13 @@
+## 2.1.7
+* getCached & getCachedUnique
+* Update fire_api to 1.1.6
+
+## 2.1.7
+* setIfAbsent and setIfAbsentUnique
+
+## 2.1.6
+* update and updateUnique
+
 ## 2.1.5
 * deleteSelf
 

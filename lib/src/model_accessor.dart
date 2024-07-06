@@ -30,9 +30,17 @@ abstract class ModelAccessor {
 
   Future<T?> getUnique<T extends ModelCrud>();
 
+  Future<T?> getCached<T extends ModelCrud>(String id);
+
+  Future<T?> getCachedUnique<T extends ModelCrud>();
+
   Future<T> ensureExists<T extends ModelCrud>(String id, T model);
 
   Future<T> ensureExistsUnique<T extends ModelCrud>(T model);
+
+  Future<void> setIfAbsent<T extends ModelCrud>(String id, T model);
+
+  Future<void> setIfAbsentUnique<T extends ModelCrud>(T model);
 
   Future<void> setSelf<T extends ModelCrud>(T self);
 
@@ -41,6 +49,11 @@ abstract class ModelAccessor {
   Future<void> set<T extends ModelCrud>(String id, T model);
 
   Stream<T> streamSelf<T extends ModelCrud>();
+
+  Future<void> update<T extends ModelCrud>(
+      String id, Map<String, dynamic> updates);
+
+  Future<void> updateUnique<T extends ModelCrud>(Map<String, dynamic> updates);
 
   Future<void> deleteSelf<T extends ModelCrud>();
 

@@ -108,6 +108,14 @@ class ModelUtility {
     return c.withPath((await ref.get()).data, ref.path);
   }
 
+  static Future<T?> pullCached<T extends ModelCrud>(
+      List<FireModel> models, String Function(FireModel c, [String? id]) pathOf,
+      [String? id]) async {
+    FireModel<T> c = selectChildModel<T>(models, id)!;
+    DocumentReference ref = FirestoreDatabase.instance.document(pathOf(c, id));
+    return c.withPath((await ref.get(cached: true)).data, ref.path);
+  }
+
   static Future<void> push<T extends ModelCrud>(List<FireModel> models,
       String Function(FireModel c, [String? id]) pathOf, T model,
       [String? id]) async {
@@ -115,6 +123,15 @@ class ModelUtility {
     await FirestoreDatabase.instance
         .document(pathOf(c, id))
         .set(c.toMap(model));
+  }
+
+  static Future<void> update<T extends ModelCrud>(
+      List<FireModel> models,
+      String Function(FireModel c, [String? id]) pathOf,
+      Map<String, dynamic> data,
+      [String? id]) async {
+    FireModel<T> c = selectChildModel<T>(models)!;
+    await FirestoreDatabase.instance.document(pathOf(c, id)).update(data);
   }
 
   static Future<T> add<T extends ModelCrud>(

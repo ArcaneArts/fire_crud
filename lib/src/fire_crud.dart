@@ -164,6 +164,16 @@ class FireCrud extends ModelAccessor {
       ModelUtility.push<T>($models, $pathOf, model, id);
 
   @override
+  Future<void> update<T extends ModelCrud>(
+          String id, Map<String, dynamic> updates) =>
+      ModelUtility.update<T>($models, $pathOf, updates, id);
+
+  @override
+  Future<void> updateUnique<T extends ModelCrud>(
+          Map<String, dynamic> updates) =>
+      ModelUtility.update<T>($models, $pathOf, updates, null);
+
+  @override
   Future<void> setUnique<T extends ModelCrud>(T model) =>
       ModelUtility.push<T>($models, $pathOf, model, null);
 
@@ -203,4 +213,20 @@ class FireCrud extends ModelAccessor {
   @override
   Future<bool> existsUnique<T extends ModelCrud>() =>
       getUnique<T>().then((value) => value != null).catchError((e) => false);
+
+  @override
+  Future<void> setIfAbsent<T extends ModelCrud>(String id, T model) =>
+      exists(id).then((v) => v ? Future.value() : set<T>(id, model));
+
+  @override
+  Future<void> setIfAbsentUnique<T extends ModelCrud>(T model) =>
+      existsUnique<T>().then((v) => v ? Future.value() : setUnique<T>(model));
+
+  @override
+  Future<T?> getCached<T extends ModelCrud>(String id) =>
+      ModelUtility.pullCached<T>($models, $pathOf, id);
+
+  @override
+  Future<T?> getCachedUnique<T extends ModelCrud>() =>
+      ModelUtility.pullCached<T>($models, $pathOf, null);
 }
