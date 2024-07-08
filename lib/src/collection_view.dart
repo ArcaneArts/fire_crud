@@ -236,9 +236,7 @@ class CollectionViewer<T extends ModelCrud> {
     try {
       DocSnap? r = _indexCache[index];
       r = (r?.exists ?? false) ? r : null;
-      return r != null
-          ? (crud.crud as FireModel<T>).withPath(r.data, r.path)
-          : null;
+      return r != null ? crud.getCrud<T>().withPath(r.data, r.path) : null;
     } catch (e) {
       return null;
     }

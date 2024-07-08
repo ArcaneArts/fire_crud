@@ -16,7 +16,8 @@ mixin ModelCrud implements ModelAccessor {
   @override
   List<FireModel> get $models => childModels;
 
-  FireModel get crud => FireCrud.instance().typeModels[runtimeType]!;
+  FireModel<T> getCrud<T extends ModelCrud>() =>
+      FireCrud.instance().typeModels[T]! as FireModel<T>;
 
   bool get isRoot =>
       FireCrud.instance().models.any((e) => e.model.runtimeType == runtimeType);
@@ -29,7 +30,7 @@ mixin ModelCrud implements ModelAccessor {
   CollectionWalker<T> walk<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.walk<T>(
-          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
           $models,
           query);
 
@@ -37,7 +38,7 @@ mixin ModelCrud implements ModelAccessor {
   CollectionViewer<T> view<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.view<T>(
-          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
           $models,
           query);
 
@@ -62,16 +63,17 @@ mixin ModelCrud implements ModelAccessor {
       ModelUtility.delete<T>($models, $pathOf, null);
 
   @override
-  Stream<T?> stream<T extends ModelCrud>(String id) =>
-      ModelUtility.stream<T>($models, $pathOf, id);
+  Stream<T?> stream<T extends ModelCrud>(String id,
+          {bool seededWithCache = true}) =>
+      ModelUtility.stream<T>($models, $pathOf, seededWithCache, id);
 
   @override
-  Stream<T?> streamUnique<T extends ModelCrud>() =>
-      ModelUtility.stream<T>($models, $pathOf, null);
+  Stream<T?> streamUnique<T extends ModelCrud>({bool seededWithCache = true}) =>
+      ModelUtility.stream<T>($models, $pathOf, seededWithCache, null);
 
   @override
   Future<T> add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
-      "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+      "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
       $models,
       $pathOf,
       model);
@@ -80,7 +82,7 @@ mixin ModelCrud implements ModelAccessor {
   Future<List<T>> getAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.pullAll<T>(
-          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
           $models,
           query);
 
@@ -88,7 +90,7 @@ mixin ModelCrud implements ModelAccessor {
   Stream<List<T>> streamAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.streamAll<T>(
-          "$documentPath/${ModelUtility.selectChildModelCollectionByType($models)!.collection}",
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
           $models,
           query);
 
@@ -152,19 +154,29 @@ mixin ModelCrud implements ModelAccessor {
 
   @override
   Future<void> setSelf<T extends ModelCrud>(T self) {
-    if (self.runtimeType != runtimeType) {
-      throw Exception("Cannot set self with a different model type");
-    }
     return FirestoreDatabase.instance
         .document(documentPath!)
-        .set(crud.toMap(self));
+        .set(getCrud<T>().toMap(self));
   }
 
   @override
-  Stream<T> streamSelf<T extends ModelCrud>() =>
-      FirestoreDatabase.instance.document(documentPath!).stream.map((event) =>
-          (event.data == null ? this : crud.withPath(event.data, documentPath!))
-              as T);
+  Stream<T> streamSelf<T extends ModelCrud>(
+      {bool seededWithCache = true}) async* {
+    if (seededWithCache) {
+      DocumentSnapshot r = await FirestoreDatabase.instance
+          .document(documentPath!)
+          .getCacheOnly();
+
+      if (r.data != null) {
+        yield getCrud<T>().withPath(r.data, documentPath!)!;
+      }
+    }
+
+    yield* FirestoreDatabase.instance.document(documentPath!).stream.map(
+        (event) => (event.data == null
+            ? this
+            : getCrud<T>().withPath(event.data, documentPath!)) as T);
+  }
 
   @override
   Future<void> update<T extends ModelCrud>(
@@ -209,12 +221,8 @@ mixin ModelCrud implements ModelAccessor {
       ModelUtility.pullCached<T>($models, $pathOf, null);
 
   @override
-  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
-    if (txn(null).runtimeType != runtimeType) {
-      throw Exception("Cannot set self with a different model type");
-    }
-    return FirestoreDatabase.instance.document(documentPath!).setAtomic(
-        (data) =>
-            crud.toMap(txn(data == null ? null : crud.fromMap(data) as T)));
-  }
+  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
+      FirestoreDatabase.instance.document(documentPath!).setAtomic((data) =>
+          getCrud<T>()
+              .toMap(txn(data == null ? null : getCrud<T>().fromMap(data))));
 }

@@ -25,7 +25,7 @@ class FireCrud extends ModelAccessor {
   CollectionWalker<T> walk<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.walk<T>(
-          ModelUtility.selectChildModelCollectionByType($models)!.collection,
+          ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
           $models,
           query);
 
@@ -33,7 +33,7 @@ class FireCrud extends ModelAccessor {
   CollectionViewer<T> view<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.view<T>(
-          ModelUtility.selectChildModelCollectionByType($models)!.collection,
+          ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
           $models,
           query);
 
@@ -87,16 +87,17 @@ class FireCrud extends ModelAccessor {
       ModelUtility.delete<T>($models, $pathOf, null);
 
   @override
-  Stream<T?> stream<T extends ModelCrud>(String id) =>
-      ModelUtility.stream<T>($models, $pathOf, id);
+  Stream<T?> stream<T extends ModelCrud>(String id,
+          {bool seededWithCache = true}) =>
+      ModelUtility.stream<T>($models, $pathOf, seededWithCache, id);
 
   @override
-  Stream<T?> streamUnique<T extends ModelCrud>() =>
-      ModelUtility.stream<T>($models, $pathOf, null);
+  Stream<T?> streamUnique<T extends ModelCrud>({bool seededWithCache = true}) =>
+      ModelUtility.stream<T>($models, $pathOf, seededWithCache, null);
 
   @override
   Future<T> add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
-      ModelUtility.selectChildModelCollectionByType($models)!.collection,
+      ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
       $models,
       $pathOf,
       model);
@@ -105,7 +106,7 @@ class FireCrud extends ModelAccessor {
   Future<List<T>> getAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.pullAll<T>(
-          ModelUtility.selectChildModelCollectionByType($models)!.collection,
+          ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
           $models,
           query);
 
@@ -113,7 +114,7 @@ class FireCrud extends ModelAccessor {
   Stream<List<T>> streamAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.streamAll<T>(
-          ModelUtility.selectChildModelCollectionByType($models)!.collection,
+          ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
           $models,
           query);
 
@@ -121,7 +122,7 @@ class FireCrud extends ModelAccessor {
   Future<int> count<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.count<T>(
-          ModelUtility.selectChildModelCollectionByType($models)!.collection,
+          ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
           $models,
           query);
 
@@ -187,7 +188,7 @@ class FireCrud extends ModelAccessor {
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
 
   @override
-  Stream<T> streamSelf<T extends ModelCrud>() {
+  Stream<T> streamSelf<T extends ModelCrud>({bool seededWithCache = true}) {
     throw Exception("streamSelf is not supported on the root accessor");
   }
 

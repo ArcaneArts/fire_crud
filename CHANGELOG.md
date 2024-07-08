@@ -1,3 +1,12 @@
+## 2.1.10
+* Caching capabilities 
+
+## 2.1.9
+* Changed crud to getCrud<T>()
+
+## 2.1.8
+* Fixes
+
 ## 2.1.7
 * getCached & getCachedUnique
 * Update fire_api to 1.1.6

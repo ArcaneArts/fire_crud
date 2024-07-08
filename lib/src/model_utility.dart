@@ -32,7 +32,7 @@ class ModelUtility {
   static CollectionViewer<T> view<T extends ModelCrud>(
       String collectionPath, List<FireModel> models,
       [CollectionReference Function(CollectionReference ref)? query]) {
-    FireModel<T> c = selectChildModelCollectionByType(models)!;
+    FireModel<T> c = selectChildModelCollectionByType<T>(models)!;
     return CollectionViewer<T>(
       crud: c.cloneWithPath("$collectionPath/*"),
       query: query,
@@ -42,7 +42,7 @@ class ModelUtility {
   static CollectionWalker<T> walk<T extends ModelCrud>(
       String collectionPath, List<FireModel> models,
       [CollectionReference Function(CollectionReference ref)? query]) {
-    FireModel<T> c = selectChildModelCollectionByType(models)!;
+    FireModel<T> c = selectChildModelCollectionByType<T>(models)!;
     return CollectionWalker<T>(
       query:
           (query?.call(FirestoreDatabase.instance.collection(collectionPath)) ??
@@ -54,7 +54,7 @@ class ModelUtility {
   static Future<List<T>> pullAll<T extends ModelCrud>(
       String collectionPath, List<FireModel> models,
       [CollectionReference Function(CollectionReference ref)? query]) {
-    FireModel<T> c = selectChildModelCollectionByType(models)!;
+    FireModel<T> c = selectChildModelCollectionByType<T>(models)!;
     return (query
                 ?.call(FirestoreDatabase.instance.collection(collectionPath)) ??
             FirestoreDatabase.instance.collection(collectionPath))
@@ -139,7 +139,7 @@ class ModelUtility {
       List<FireModel> models,
       String Function(FireModel c, [String? id]) pathOf,
       T model) async {
-    FireModel<T> c = selectChildModelCollectionByType(models)!;
+    FireModel<T> c = selectChildModelCollectionByType<T>(models)!;
     DocumentReference r = await FirestoreDatabase.instance
         .collection(collectionPath)
         .add(c.toMap(model));
@@ -163,11 +163,22 @@ class ModelUtility {
         (data) => c.toMap(txn(data == null ? null : c.fromMap(data))));
   }
 
-  static Stream<T?> stream<T extends ModelCrud>(
-      List<FireModel> models, String Function(FireModel c, [String? id]) pathOf,
-      [String? id]) {
+  static Stream<T?> stream<T extends ModelCrud>(List<FireModel> models,
+      String Function(FireModel c, [String? id]) pathOf, bool seededWithCache,
+      [String? id]) async* {
     FireModel<T> c = selectChildModel<T>(models, id)!;
-    return FirestoreDatabase.instance
+
+    if (seededWithCache) {
+      DocumentSnapshot r = await FirestoreDatabase.instance
+          .document(pathOf(c, id))
+          .getCacheOnly();
+
+      if (r.data != null) {
+        yield c.withPath(r.data, r.reference.path);
+      }
+    }
+
+    yield* FirestoreDatabase.instance
         .document(pathOf(c, id))
         .stream
         .map((event) => c.withPath(event.data, event.reference.path));
