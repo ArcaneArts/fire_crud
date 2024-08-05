@@ -1,6 +1,6 @@
 name: fire_crud
 description: CRUD Operations for firestore
-version: 2.1.10
+version: 2.1.13
 homepage: https://github.com/ArcaneArts/fire_crud
 environment:
   sdk: '>=3.0.0 <4.0.0'

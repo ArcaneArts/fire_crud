@@ -87,13 +87,12 @@ class FireCrud extends ModelAccessor {
       ModelUtility.delete<T>($models, $pathOf, null);
 
   @override
-  Stream<T?> stream<T extends ModelCrud>(String id,
-          {bool seededWithCache = true}) =>
-      ModelUtility.stream<T>($models, $pathOf, seededWithCache, id);
+  Stream<T?> stream<T extends ModelCrud>(String id) =>
+      ModelUtility.stream<T>($models, $pathOf, id);
 
   @override
-  Stream<T?> streamUnique<T extends ModelCrud>({bool seededWithCache = true}) =>
-      ModelUtility.stream<T>($models, $pathOf, seededWithCache, null);
+  Stream<T?> streamUnique<T extends ModelCrud>() =>
+      ModelUtility.stream<T>($models, $pathOf, null);
 
   @override
   Future<T> add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
@@ -188,7 +187,7 @@ class FireCrud extends ModelAccessor {
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
 
   @override
-  Stream<T> streamSelf<T extends ModelCrud>({bool seededWithCache = true}) {
+  Stream<T> streamSelf<T extends ModelCrud>() {
     throw Exception("streamSelf is not supported on the root accessor");
   }
 

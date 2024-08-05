@@ -143,7 +143,7 @@ class ModelUtility {
     DocumentReference r = await FirestoreDatabase.instance
         .collection(collectionPath)
         .add(c.toMap(model));
-    return c.cloneWithPath(pathOf(c, r.path));
+    return c.cloneWithPath(pathOf(c, r.id));
   }
 
   static Future<void> delete<T extends ModelCrud>(
@@ -163,22 +163,12 @@ class ModelUtility {
         (data) => c.toMap(txn(data == null ? null : c.fromMap(data))));
   }
 
-  static Stream<T?> stream<T extends ModelCrud>(List<FireModel> models,
-      String Function(FireModel c, [String? id]) pathOf, bool seededWithCache,
-      [String? id]) async* {
+  static Stream<T?> stream<T extends ModelCrud>(
+      List<FireModel> models, String Function(FireModel c, [String? id]) pathOf,
+      [String? id]) {
     FireModel<T> c = selectChildModel<T>(models, id)!;
 
-    if (seededWithCache) {
-      DocumentSnapshot r = await FirestoreDatabase.instance
-          .document(pathOf(c, id))
-          .getCacheOnly();
-
-      if (r.data != null) {
-        yield c.withPath(r.data, r.reference.path);
-      }
-    }
-
-    yield* FirestoreDatabase.instance
+    return FirestoreDatabase.instance
         .document(pathOf(c, id))
         .stream
         .map((event) => c.withPath(event.data, event.reference.path));

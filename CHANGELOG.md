@@ -1,5 +1,14 @@
+## 2.1.13
+* Fixed the add function not working correctly
+
+## 2.1.12
+* Drop seed with cache support
+
+## 2.1.11
+* Fixes for caching & stream pool support
+
 ## 2.1.10
-* Caching capabilities 
+* Caching capabilities
 
 ## 2.1.9
 * Changed crud to getCrud<T>()

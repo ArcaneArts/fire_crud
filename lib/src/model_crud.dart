@@ -63,13 +63,12 @@ mixin ModelCrud implements ModelAccessor {
       ModelUtility.delete<T>($models, $pathOf, null);
 
   @override
-  Stream<T?> stream<T extends ModelCrud>(String id,
-          {bool seededWithCache = true}) =>
-      ModelUtility.stream<T>($models, $pathOf, seededWithCache, id);
+  Stream<T?> stream<T extends ModelCrud>(String id) =>
+      ModelUtility.stream<T>($models, $pathOf, id);
 
   @override
-  Stream<T?> streamUnique<T extends ModelCrud>({bool seededWithCache = true}) =>
-      ModelUtility.stream<T>($models, $pathOf, seededWithCache, null);
+  Stream<T?> streamUnique<T extends ModelCrud>() =>
+      ModelUtility.stream<T>($models, $pathOf, null);
 
   @override
   Future<T> add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
@@ -160,23 +159,12 @@ mixin ModelCrud implements ModelAccessor {
   }
 
   @override
-  Stream<T> streamSelf<T extends ModelCrud>(
-      {bool seededWithCache = true}) async* {
-    if (seededWithCache) {
-      DocumentSnapshot r = await FirestoreDatabase.instance
-          .document(documentPath!)
-          .getCacheOnly();
-
-      if (r.data != null) {
-        yield getCrud<T>().withPath(r.data, documentPath!)!;
-      }
-    }
-
-    yield* FirestoreDatabase.instance.document(documentPath!).stream.map(
-        (event) => (event.data == null
-            ? this
-            : getCrud<T>().withPath(event.data, documentPath!)) as T);
-  }
+  Stream<T> streamSelf<T extends ModelCrud>() => FirestoreDatabase.instance
+      .document(documentPath!)
+      .stream
+      .map((event) => (event.data == null
+          ? this
+          : getCrud<T>().withPath(event.data, documentPath!)) as T);
 
   @override
   Future<void> update<T extends ModelCrud>(

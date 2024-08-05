@@ -48,7 +48,7 @@ abstract class ModelAccessor {
 
   Future<void> set<T extends ModelCrud>(String id, T model);
 
-  Stream<T> streamSelf<T extends ModelCrud>({bool seededWithCache = true});
+  Stream<T> streamSelf<T extends ModelCrud>();
 
   Future<void> update<T extends ModelCrud>(
       String id, Map<String, dynamic> updates);
@@ -68,10 +68,9 @@ abstract class ModelAccessor {
 
   Future<void> deleteUnique<T extends ModelCrud>();
 
-  Stream<T?> stream<T extends ModelCrud>(String id,
-      {bool seededWithCache = true});
+  Stream<T?> stream<T extends ModelCrud>(String id);
 
-  Stream<T?> streamUnique<T extends ModelCrud>({bool seededWithCache = true});
+  Stream<T?> streamUnique<T extends ModelCrud>();
 
   Future<T> add<T extends ModelCrud>(T model);
 
