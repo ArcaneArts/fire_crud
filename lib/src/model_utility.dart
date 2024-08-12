@@ -143,7 +143,7 @@ class ModelUtility {
     DocumentReference r = await FirestoreDatabase.instance
         .collection(collectionPath)
         .add(c.toMap(model));
-    return c.cloneWithPath(pathOf(c, r.id));
+    return c.cloneWithPath(pathOf(c, r.id), model);
   }
 
   static Future<void> delete<T extends ModelCrud>(

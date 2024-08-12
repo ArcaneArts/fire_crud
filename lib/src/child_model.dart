@@ -15,7 +15,8 @@ class FireModel<T extends ModelCrud> {
   final Map<String, dynamic> Function(T crud) toMap;
   final T Function(Map<String, dynamic>) fromMap;
 
-  T cloneWithPath(String path) => fromMap(toMap(model))..documentPath = path;
+  T cloneWithPath(String path, [T? useModel]) =>
+      fromMap(toMap(useModel ?? model))..documentPath = path;
 
   T? withPath(Map<String, dynamic>? data, String path) =>
       data == null ? null : (fromMap(data)..documentPath = path);
