@@ -1,3 +1,6 @@
+## 2.2.0
+* Fake data for shimmering
+
 ## 2.1.13
 * Fixed the add function not working correctly
 

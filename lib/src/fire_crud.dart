@@ -45,7 +45,7 @@ class FireCrud extends ModelAccessor {
   List<FireModel<ModelCrud>> get $models => models;
 
   @override
-  T model<T extends ModelCrud>(String id) =>
+  T model<T extends ModelCrud>([String? id]) =>
       ModelUtility.model<T>($models, $pathOf, id);
 
   @override
@@ -204,6 +204,11 @@ class FireCrud extends ModelAccessor {
   @override
   Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
     throw Exception("setSelfAtomic is not supported on the root accessor");
+  }
+
+  @override
+  Future<T?> getSelf<T extends ModelCrud>() {
+    throw Exception("getSelf is not supported on the root accessor");
   }
 
   @override

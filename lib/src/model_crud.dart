@@ -13,6 +13,10 @@ mixin ModelCrud implements ModelAccessor {
       documentPath?.split("/").reversed.skip(1).reversed().join("/");
   List<FireModel> get childModels;
 
+  /// Return a new instance of this class.
+  /// Use this to generate fake data for shimmers. Try using https://pub.dev/packages/faker for sanity.
+  ModelCrud get fakeData;
+
   @override
   List<FireModel> get $models => childModels;
 
@@ -43,7 +47,7 @@ mixin ModelCrud implements ModelAccessor {
           query);
 
   @override
-  T model<T extends ModelCrud>(String id) =>
+  T model<T extends ModelCrud>([String? id]) =>
       ModelUtility.model<T>($models, $pathOf, id);
 
   @override
@@ -183,6 +187,18 @@ mixin ModelCrud implements ModelAccessor {
   Future<void> updateUnique<T extends ModelCrud>(
           Map<String, dynamic> updates) =>
       ModelUtility.update<T>($models, $pathOf, updates, null);
+
+  @override
+  Future<T?> getSelf<T extends ModelCrud>() async {
+    if (documentPath == null) {
+      throw Exception("Cannot get self without a document path");
+    }
+
+    return getCrud<T>().fromMap(
+        (await FirestoreDatabase.instance.document(documentPath!).get()).data ??
+            {})
+      ..documentPath = documentPath;
+  }
 
   @override
   Future<void> deleteSelf<T extends ModelCrud>() {

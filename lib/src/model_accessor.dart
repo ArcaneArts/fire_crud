@@ -16,7 +16,7 @@ abstract class ModelAccessor {
       [CollectionReference Function(CollectionReference ref)? query]);
 
   /// Gets a child model type in a subcollection of this document. The type determines what the subcollection actually is.
-  T model<T extends ModelCrud>(String id);
+  T model<T extends ModelCrud>([String? id]);
 
   T modelUnique<T extends ModelCrud>();
 
@@ -33,6 +33,8 @@ abstract class ModelAccessor {
   Future<T?> getCached<T extends ModelCrud>(String id);
 
   Future<T?> getCachedUnique<T extends ModelCrud>();
+
+  Future<T?> getSelf<T extends ModelCrud>();
 
   Future<T> ensureExists<T extends ModelCrud>(String id, T model);
 
