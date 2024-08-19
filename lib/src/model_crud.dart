@@ -13,10 +13,6 @@ mixin ModelCrud implements ModelAccessor {
       documentPath?.split("/").reversed.skip(1).reversed().join("/");
   List<FireModel> get childModels;
 
-  /// Return a new instance of this class.
-  /// Use this to generate fake data for shimmers. Try using https://pub.dev/packages/faker for sanity.
-  ModelCrud get fakeData;
-
   @override
   List<FireModel> get $models => childModels;
 

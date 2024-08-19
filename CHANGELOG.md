@@ -1,3 +1,7 @@
+## 2.3.0
+* Remove Shimmering
+* Add getSelf
+
 ## 2.2.0
 * Fake data for shimmering
 
