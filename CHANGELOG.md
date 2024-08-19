@@ -1,3 +1,10 @@
+## 2.3.3
+* template path info
+* parent model pathing helpers
+
+## 2.3.2
+* hasParent on models function
+
 ## 2.3.1
 * findModel function
 

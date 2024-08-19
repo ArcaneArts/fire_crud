@@ -101,6 +101,19 @@ mixin ModelCrud implements ModelAccessor {
           $models,
           query);
 
+  /// Returns a list of parents up a tree to the root model excluding this model
+  /// The first entry in this list is the parent of this model
+  /// The last entry is a root model
+  /// This list is empty if this already is a root model
+  Iterable<ModelCrud> parentModelPath() sync* {
+    if (!hasParent) {
+      return;
+    }
+
+    yield parentModel();
+    yield* parentModel<ModelCrud>().parentModelPath();
+  }
+
   @override
   Future<T> ensureExists<T extends ModelCrud>(String id, T model) async {
     T? t = await get<T>(id);
@@ -141,11 +154,12 @@ mixin ModelCrud implements ModelAccessor {
     return null;
   }
 
-  Type get parentModelType =>
-      FireCrud.instance().modelForPath(parentDocumentPath!).runtimeType;
+  Type get parentModelType => FireCrud.instance()
+      .modelForPath(parentDocumentPath ?? getCrud().templatePath)
+      .runtimeType;
 
-  T parentModel<T extends ModelCrud>() =>
-      FireCrud.instance().modelForPath(parentDocumentPath!);
+  T parentModel<T extends ModelCrud>() => FireCrud.instance()
+      .modelForPath(parentDocumentPath ?? getCrud().templatePath);
 
   @override
   Future<T?> get<T extends ModelCrud>(String id) =>
@@ -224,6 +238,8 @@ mixin ModelCrud implements ModelAccessor {
     }
     return FirestoreDatabase.instance.document(documentPath!).delete();
   }
+
+  bool get hasParent => getCrud().templatePath.split("/").length > 1;
 
   @override
   Future<bool> exists<T extends ModelCrud>(String id) =>

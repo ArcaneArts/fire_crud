@@ -14,6 +14,7 @@ class FireModel<T extends ModelCrud> {
 
   final Map<String, dynamic> Function(T crud) toMap;
   final T Function(Map<String, dynamic>) fromMap;
+  late String templatePath;
 
   T cloneWithPath(String path, [T? useModel]) =>
       fromMap(toMap(useModel ?? model))..documentPath = path;
@@ -31,6 +32,8 @@ class FireModel<T extends ModelCrud> {
   void registerTypeModels() {
     for (FireModel i in model.childModels) {
       FireCrud.instance().typeModels[i.model.runtimeType] = i;
+      i.templatePath =
+          "$templatePath/${"${i.collection}/\$${i.model.runtimeType}.id"}";
       i.registerTypeModels();
     }
   }

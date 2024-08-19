@@ -15,9 +15,35 @@ class FireCrud extends ModelAccessor {
 
   List<FireModel> models = [];
 
+  FireModel? getCrudForDocumentPath(String path) {
+    List<String> segments = path.split("/");
+
+    searching:
+    for (FireModel i in typeModels.values) {
+      List<String> iSegments = i.templatePath.split("/");
+
+      if (iSegments.length != segments.length) {
+        continue;
+      }
+
+      for (int j = 0; j < iSegments.length; j += 2) {
+        if (iSegments[j] != segments[j]) {
+          continue searching;
+        }
+
+        if (j == iSegments.length - 2) {
+          return i;
+        }
+      }
+    }
+
+    return null;
+  }
+
   void registerModel(FireModel root) {
     models.add(root);
     typeModels[root.model.runtimeType] = root;
+    root.templatePath = "${root.collection}/\$${root.model.runtimeType}.id";
     root.registerTypeModels();
   }
 
