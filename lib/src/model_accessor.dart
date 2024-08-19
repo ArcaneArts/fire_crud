@@ -36,6 +36,8 @@ abstract class ModelAccessor {
 
   Future<T?> getSelf<T extends ModelCrud>();
 
+  T? findModel<T extends ModelCrud>();
+
   Future<T> ensureExists<T extends ModelCrud>(String id, T model);
 
   Future<T> ensureExistsUnique<T extends ModelCrud>(T model);

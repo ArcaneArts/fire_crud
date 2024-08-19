@@ -1,3 +1,6 @@
+## 2.3.1
+* findModel function
+
 ## 2.3.0
 * Remove Shimmering
 * Add getSelf

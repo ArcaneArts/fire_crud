@@ -234,4 +234,22 @@ class FireCrud extends ModelAccessor {
   @override
   Future<T?> getCachedUnique<T extends ModelCrud>() =>
       ModelUtility.pullCached<T>($models, $pathOf, null);
+
+  @override
+  T? findModel<T extends ModelCrud>() {
+    if (typeModels.containsKey(T)) {
+      return typeModels[T]!.model as T;
+    }
+
+    T? t;
+    for (FireModel i in $models) {
+      t = i.model.findModel<T>();
+
+      if (t != null) {
+        return t;
+      }
+    }
+
+    return null;
+  }
 }

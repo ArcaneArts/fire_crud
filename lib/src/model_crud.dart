@@ -123,6 +123,27 @@ mixin ModelCrud implements ModelAccessor {
     return t;
   }
 
+  @override
+  T? findModel<T extends ModelCrud>() {
+    if (runtimeType == T) {
+      return this as T;
+    }
+
+    T? t;
+    for (FireModel i in $models) {
+      t = i.model.findModel<T>();
+
+      if (t != null) {
+        return t;
+      }
+    }
+
+    return null;
+  }
+
+  Type get parentModelType =>
+      FireCrud.instance().modelForPath(parentDocumentPath!).runtimeType;
+
   T parentModel<T extends ModelCrud>() =>
       FireCrud.instance().modelForPath(parentDocumentPath!);
 
