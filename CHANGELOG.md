@@ -1,3 +1,6 @@
+# 2.3.4
+* Full implicit support
+
 ## 2.3.3
 * template path info
 * parent model pathing helpers

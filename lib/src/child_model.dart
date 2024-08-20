@@ -15,6 +15,7 @@ class FireModel<T extends ModelCrud> {
   final Map<String, dynamic> Function(T crud) toMap;
   final T Function(Map<String, dynamic>) fromMap;
   late String templatePath;
+  String get parentTemplatePath => _parentPath(templatePath);
 
   T cloneWithPath(String path, [T? useModel]) =>
       fromMap(toMap(useModel ?? model))..documentPath = path;
@@ -37,4 +38,11 @@ class FireModel<T extends ModelCrud> {
       i.registerTypeModels();
     }
   }
+}
+
+String _parentPath(String path) {
+  List<String> s = path.split("/");
+  s.removeLast();
+  s.removeLast();
+  return s.join("/");
 }

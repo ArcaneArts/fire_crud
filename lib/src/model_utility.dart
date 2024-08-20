@@ -19,7 +19,7 @@ class ModelUtility {
   static FireModel<T>? selectChildModelByCollection<T extends ModelCrud>(
       List<FireModel> models, String collection,
       [String? id]) {
-    return models.where((e) => e.collection == collection) as FireModel<T>;
+    return models.select((e) => e.collection == collection) as FireModel<T>?;
   }
 
   static FireModel<T>? selectChildModelCollectionByType<T extends ModelCrud>(

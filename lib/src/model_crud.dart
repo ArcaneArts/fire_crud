@@ -17,7 +17,8 @@ mixin ModelCrud implements ModelAccessor {
   List<FireModel> get $models => childModels;
 
   FireModel<T> getCrud<T extends ModelCrud>() =>
-      FireCrud.instance().typeModels[T]! as FireModel<T>;
+      FireCrud.instance().typeModels[T == ModelCrud ? runtimeType : T]!
+          as FireModel<T>;
 
   bool get isRoot =>
       FireCrud.instance().models.any((e) => e.model.runtimeType == runtimeType);
@@ -155,11 +156,11 @@ mixin ModelCrud implements ModelAccessor {
   }
 
   Type get parentModelType => FireCrud.instance()
-      .modelForPath(parentDocumentPath ?? getCrud().templatePath)
+      .modelForPath(parentDocumentPath ?? getCrud().parentTemplatePath)
       .runtimeType;
 
   T parentModel<T extends ModelCrud>() => FireCrud.instance()
-      .modelForPath(parentDocumentPath ?? getCrud().templatePath);
+      .modelForPath(parentDocumentPath ?? getCrud().parentTemplatePath);
 
   @override
   Future<T?> get<T extends ModelCrud>(String id) =>
@@ -239,7 +240,7 @@ mixin ModelCrud implements ModelAccessor {
     return FirestoreDatabase.instance.document(documentPath!).delete();
   }
 
-  bool get hasParent => getCrud().templatePath.split("/").length > 1;
+  bool get hasParent => getCrud().templatePath.split("/").length > 2;
 
   @override
   Future<bool> exists<T extends ModelCrud>(String id) =>
