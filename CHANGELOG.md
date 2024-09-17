@@ -1,3 +1,6 @@
+# 2.3.5
+* Generator Annotation
+
 # 2.3.4
 * Full implicit support
 
