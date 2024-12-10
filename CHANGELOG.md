@@ -1,7 +1,10 @@
-# 2.3.5
+## 2.3.8
+* Auto Support pylon codecs 
+
+## 2.3.5
 * Generator Annotation
 
-# 2.3.4
+## 2.3.4
 * Full implicit support
 
 ## 2.3.3

@@ -1,9 +1,10 @@
 import 'package:collection_walker/collection_walker.dart';
 import 'package:fire_api/fire_api.dart';
 import 'package:fire_crud/fire_crud.dart';
+import 'package:pylon_codec/pylon_codec.dart';
 import 'package:toxic/extensions/iterable.dart';
 
-mixin ModelCrud implements ModelAccessor {
+mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
   String? documentPath;
   String? get documentId => documentPath?.split("/").last;
   String? get parentDocumentPath =>
@@ -12,6 +13,15 @@ mixin ModelCrud implements ModelAccessor {
   String? get parentCollectionPath =>
       documentPath?.split("/").reversed.skip(1).reversed().join("/");
   List<FireModel> get childModels;
+
+  @override
+  String pylonEncode(ModelCrud value) => documentPath!;
+
+  @override
+  Future<ModelCrud> pylonDecode(String value) async =>
+      ((FireCrud.instance().typeModels[runtimeType]!).fromMap(
+          (await FirestoreDatabase.instance.document(value).get()).data ?? {})
+        ..documentPath = documentPath);
 
   @override
   List<FireModel> get $models => childModels;
