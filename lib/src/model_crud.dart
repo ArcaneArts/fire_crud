@@ -15,7 +15,7 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
   List<FireModel> get childModels;
 
   @override
-  String pylonEncode(ModelCrud value) => documentPath!;
+  String pylonEncode(ModelCrud value) => value.documentPath!;
 
   @override
   Future<ModelCrud> pylonDecode(String value) async =>

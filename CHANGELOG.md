@@ -1,3 +1,6 @@
+## 2.3.9
+* Fix pylon codec
+
 ## 2.3.8
 * Auto Support pylon codecs 
 
