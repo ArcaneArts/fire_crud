@@ -1,3 +1,6 @@
+## 2.3.10
+* Support fire_api 1.2.0+ <2.0.0
+
 ## 2.3.9
 * Fix pylon codec
 
