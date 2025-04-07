@@ -118,37 +118,50 @@ class CollectionViewer<T extends ModelCrud> {
 
     if (_window == null) {
       int start = max(_lastIndex - streamWindow + streamWindowPadding, 0);
-      _window = (start, start + streamWindow);
-      await getAt(start);
-      _windowStream =
-          _q.startAt(_indexCache[start]!).limit(streamWindow).stream;
-      _windowSub = _windowStream!.listen((event) {
-        _log(
-            "Window: [${_window!.$1} to ${_window!.$2}] received stream update.");
-        int g = 0;
-        for (DocSnap i in event) {
-          capture(start + g++, i);
-        }
 
-        bool sizeChange = false;
-
-        for (DocumentSnapshot i in event) {
-          if (i.changeType == DocumentChangeType.removed) {
-            _indexCache.removeWhere((key, value) => value.id == i.id);
-            sizeChange = true;
-          } else if (i.changeType == DocumentChangeType.added) {
-            sizeChange = true;
+      if (_indexCache[start] != null) {
+        _window = (start, start + streamWindow);
+        await getAt(start);
+        _windowStream =
+            _q.startAt(_indexCache[start]!).limit(streamWindow).stream;
+        _windowSub = _windowStream!.listen((event) {
+          _log(
+              "Window: [${_window!.$1} to ${_window!.$2}] received stream update.");
+          int g = 0;
+          for (DocSnap i in event) {
+            capture(start + g++, i);
           }
-        }
 
-        if (sizeChange) {
-          clear();
-        }
+          bool sizeChange = false;
 
-        _onWindowUpdate();
-      });
+          for (DocumentSnapshot i in event) {
+            if (i.changeType == DocumentChangeType.removed) {
+              _indexCache.removeWhere((key, value) => value.id == i.id);
+              sizeChange = true;
+              _log(
+                  "Stream detected document removal, removed index: ${i.id} at $g (SIZE CHANGED)");
+            } else if (i.changeType == DocumentChangeType.added) {
+              if (_indexCache.values.any((v) => i.id == v.id)) {
+              } else {
+                sizeChange = true;
+                _log(
+                    "Stream detected document addition: ${i.id} at $g (SIZE CHANGED)");
+              }
+            }
+          }
 
-      _log("Window: [${_window!.$1} to ${_window!.$2}] opened in stream.");
+          if (sizeChange) {
+            _log("Size Changed, clearing cache.");
+            clear();
+          }
+
+          _onWindowUpdate();
+        });
+
+        _log("Window: [${_window!.$1} to ${_window!.$2}] opened in stream.");
+      } else {
+        _log("No valid start index found for window, not opening stream.");
+      }
     }
   }
 
@@ -328,9 +341,13 @@ class CollectionViewer<T extends ModelCrud> {
     }
 
     if (index < snap.$1) {
+      _log(
+          "PullSmart: INDEX $index is < ${snap.$1}. Pulling ref=${snap.$1}, (ref-index+streamwindow = ${snap.$1} - $index + $streamWindow) = ${snap.$1 - index + streamWindow})");
       return pullPreviousCountSmart(
           snap.$1, snap.$2, snap.$1 - index + streamWindow);
     } else {
+      _log(
+          "PullSmart: INDEX $index is >= ${snap.$1}. Pulling ref=${snap.$1}, (index - ref + streamWindow = $index - ${snap.$1} + $streamWindow) = ${index - snap.$1 + streamWindow})");
       return pullNextCountSmart(
           snap.$1, snap.$2, index - snap.$1 + streamWindow);
     }
@@ -369,6 +386,7 @@ class CollectionViewer<T extends ModelCrud> {
 
   Future<void> pullNextCountSmart(int refIndex, DocSnap ref, int cnt) {
     if (cnt < 1) {
+      _log("PullNextCountSmart: Count is less than 1, nothing to pull.");
       return Future.value();
     }
 
