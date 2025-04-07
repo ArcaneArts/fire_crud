@@ -1,3 +1,6 @@
+## 2.3.12
+* Update Self method
+
 ## 2.3.11
 * Bugfixes for CollectionViewers
 

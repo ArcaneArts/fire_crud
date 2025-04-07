@@ -181,17 +181,8 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
       ModelUtility.pull<T>($models, $pathOf, null);
 
   @override
-  Future<void> set<T extends ModelCrud>(String id, T model) =>
-      ModelUtility.push<T>($models, $pathOf, model, id);
-
-  @override
   Future<void> setUnique<T extends ModelCrud>(T model) =>
       ModelUtility.push<T>($models, $pathOf, model, null);
-
-  @override
-  Future<void> setAtomic<T extends ModelCrud>(
-          String id, T Function(T? data) txn) =>
-      ModelUtility.pushAtomic<T>($models, $pathOf, txn, id);
 
   @override
   Future<void> setUniqueAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
@@ -203,6 +194,25 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
         .document(documentPath!)
         .set(getCrud<T>().toMap(self));
   }
+
+  @override
+  Future<void> set<T extends ModelCrud>(String id, T model) =>
+      ModelUtility.push<T>($models, $pathOf, model, id);
+
+  @override
+  Future<void> updateSelf<T extends ModelCrud>(Map<String, dynamic> updates) =>
+      FirestoreDatabase.instance.document(documentPath!).update(updates);
+
+  @override
+  Future<void> setAtomic<T extends ModelCrud>(
+          String id, T Function(T? data) txn) =>
+      ModelUtility.pushAtomic<T>($models, $pathOf, txn, id);
+
+  @override
+  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
+      FirestoreDatabase.instance.document(documentPath!).setAtomic((data) =>
+          getCrud<T>()
+              .toMap(txn(data == null ? null : getCrud<T>().fromMap(data))));
 
   @override
   Stream<T> streamSelf<T extends ModelCrud>() => FirestoreDatabase.instance
@@ -267,10 +277,4 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
   @override
   Future<T?> getCachedUnique<T extends ModelCrud>() =>
       ModelUtility.pullCached<T>($models, $pathOf, null);
-
-  @override
-  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
-      FirestoreDatabase.instance.document(documentPath!).setAtomic((data) =>
-          getCrud<T>()
-              .toMap(txn(data == null ? null : getCrud<T>().fromMap(data))));
 }

@@ -59,6 +59,8 @@ abstract class ModelAccessor {
 
   Future<void> updateUnique<T extends ModelCrud>(Map<String, dynamic> updates);
 
+  Future<void> updateSelf<T extends ModelCrud>(Map<String, dynamic> updates);
+
   Future<void> deleteSelf<T extends ModelCrud>();
 
   Future<void> setAtomic<T extends ModelCrud>(

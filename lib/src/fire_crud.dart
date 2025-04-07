@@ -228,6 +228,11 @@ class FireCrud extends ModelAccessor {
   }
 
   @override
+  Future<void> updateSelf<T extends ModelCrud>(Map<String, dynamic> updates) =>
+      throw Future.error(
+          Exception("updateSelf is not supported on the root accessor"));
+
+  @override
   Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
     throw Exception("setSelfAtomic is not supported on the root accessor");
   }
