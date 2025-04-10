@@ -262,14 +262,26 @@ class CollectionViewer<T extends ModelCrud> {
   }
 
   Future<int> getSize() async {
+    int? sizesc = _cacheSize;
     _cacheSize ??= await _q.count().thenRun((v) => _log("Size Captured: $v"));
+
+    if (sizesc == _cacheSize) {
+      return _cacheSize!;
+    }
 
     if (_cacheSize != null && _cacheSize! < 1) {
       _lastIndex = 0;
       _indexCache.clear();
 
+      bool ignoreFirst = true;
+
       _emptyListener ??=
           _q.limit(1).stream.map((event) => event.isNotEmpty).listen((event) {
+        if (ignoreFirst) {
+          ignoreFirst = false;
+          return;
+        }
+
         if (event) {
           _cacheSize = null;
           _emptyListener?.cancel();
