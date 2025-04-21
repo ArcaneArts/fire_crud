@@ -88,4 +88,10 @@ abstract class ModelAccessor {
 
   Future<int> count<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
+
+  Future<void> change<T extends ModelCrud>(String id, T before, T after);
+
+  Future<void> changeUnique<T extends ModelCrud>(T before, T after);
+
+  Future<void> changeSelf<T extends ModelCrud>(T before, T after);
 }

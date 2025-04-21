@@ -201,7 +201,9 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
 
   @override
   Future<void> updateSelf<T extends ModelCrud>(Map<String, dynamic> updates) =>
-      FirestoreDatabase.instance.document(documentPath!).update(updates);
+      updates.isEmpty
+          ? Future.value()
+          : FirestoreDatabase.instance.document(documentPath!).update(updates);
 
   @override
   Future<void> setAtomic<T extends ModelCrud>(
@@ -277,4 +279,25 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
   @override
   Future<T?> getCachedUnique<T extends ModelCrud>() =>
       ModelUtility.pullCached<T>($models, $pathOf, null);
+
+  @override
+  Future<void> change<T extends ModelCrud>(String id, T before, T after) {
+    FireModel<T> c = ModelUtility.selectChildModel<T>($models)!;
+    return update<T>(
+        id, ModelUtility.getUpdates(c.toMap(before), c.toMap(after)));
+  }
+
+  @override
+  Future<void> changeUnique<T extends ModelCrud>(T before, T after) {
+    FireModel<T> c = ModelUtility.selectChildModel<T>($models)!;
+    return updateUnique<T>(
+        ModelUtility.getUpdates(c.toMap(before), c.toMap(after)));
+  }
+
+  @override
+  Future<void> changeSelf<T extends ModelCrud>(T before, T after) {
+    FireModel<T> c = ModelUtility.selectChildModel<T>($models)!;
+    return updateSelf<T>(
+        ModelUtility.getUpdates(c.toMap(before), c.toMap(after)));
+  }
 }

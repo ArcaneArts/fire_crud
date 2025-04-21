@@ -173,4 +173,122 @@ class ModelUtility {
         .stream
         .map((event) => c.withPath(event.data, event.reference.path));
   }
+
+  static Map<String, dynamic> getUpdates(
+      Map<String, dynamic> before, Map<String, dynamic> after) {
+    Map<String, dynamic> changes = <String, dynamic>{};
+    Map<String, dynamic> flatBefore = _flatten(before);
+    Map<String, dynamic> flatAfter = _flatten(after);
+
+    Set<String> paths = <String>{};
+    paths.addAll(flatBefore.keys);
+    paths.addAll(flatAfter.keys);
+
+    for (String path in paths) {
+      dynamic a = flatBefore[path];
+      dynamic b = flatAfter[path];
+
+      if (a == b) {
+        continue;
+      }
+
+      if (b == null) {
+        changes[path] = FieldValue.delete();
+        continue;
+      }
+
+      if (a == null) {
+        changes[path] = b;
+        continue;
+      }
+
+      if (a is int && b is int) {
+        changes[path] = FieldValue.increment(b - a);
+        continue;
+      }
+
+      if (a is double && b is double) {
+        changes[path] = FieldValue.increment(b - a);
+        continue;
+      }
+
+      if (a is List && b is List) {
+        changes[path] = _diffLists(a, b) ?? b;
+        continue;
+      }
+
+      changes[path] = b;
+    }
+
+    return changes;
+  }
+
+  static dynamic _diffLists(List<dynamic> a, List<dynamic> b) {
+    if (!_isSimpleList(a) || !_isSimpleList(b)) {
+      return null;
+    }
+
+    List<dynamic> toAdd = b.where((dynamic e) => !a.contains(e)).toList();
+    List<dynamic> toRemove = a.where((dynamic e) => !b.contains(e)).toList();
+
+    if ((toAdd.isEmpty && toRemove.isEmpty) ||
+        (toAdd.isNotEmpty && toRemove.isNotEmpty)) {
+      return null;
+    }
+
+    return toAdd.isNotEmpty
+        ? FieldValue.arrayUnion(toAdd)
+        : FieldValue.arrayRemove(toRemove);
+  }
+
+  static bool _isSimpleList(List<dynamic> list) {
+    Type? baseType;
+
+    for (dynamic element in list) {
+      if (element is Map || element is List) {
+        return false;
+      }
+
+      baseType ??= element.runtimeType;
+
+      if (baseType != element.runtimeType) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static Map<String, dynamic> _flatten(Map<String, dynamic> map,
+      {String prefix = ''}) {
+    Map<String, dynamic> out = <String, dynamic>{};
+    map.forEach((String key, dynamic value) {
+      String fullKey = prefix.isEmpty ? key : '$prefix$key';
+      if (value is Map<String, dynamic>) {
+        out.addAll(_flatten(value, prefix: '$fullKey.'));
+      } else {
+        out[fullKey] = value;
+      }
+    });
+    return out;
+  }
+
+  static Map<String, dynamic> unflatten(Map<String, dynamic> flat) {
+    Map<String, dynamic> root = <String, dynamic>{};
+    flat.forEach((String path, dynamic value) {
+      List<String> parts = path.split('.');
+      Map<String, dynamic> cursor = root;
+      for (int i = 0; i < parts.length; i++) {
+        String part = parts[i];
+        if (i == parts.length - 1) {
+          cursor[part] = value;
+        } else {
+          if (cursor[part] == null || cursor[part] is! Map<String, dynamic>) {
+            cursor[part] = <String, dynamic>{};
+          }
+          cursor = cursor[part] as Map<String, dynamic>;
+        }
+      }
+    });
+    return root;
+  }
 }
