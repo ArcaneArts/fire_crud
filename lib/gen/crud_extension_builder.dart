@@ -28,17 +28,33 @@ class _ChildModelInfo {
 }
 
 List<_FieldInfo> fieldsOf(ClassElement cls) {
-  final LibraryElement owningLib = cls.library;
+  final Map<String, _FieldInfo> seen = <String, _FieldInfo>{};
+  ClassElement? current = cls;
 
-  return cls.fields
-      .where((FieldElement f) =>
-          !f.isStatic && !f.isSynthetic && !f.isPrivate) // skip _foo
-      .map((FieldElement f) {
-    final DartType dt = f.type;
-    final Uri uri = importForType(dt, owningLib); // helper below
-    return _FieldInfo(
-        f.name, dt.getDisplayString(withNullability: true), uri, dt);
-  }).toList(growable: false);
+  while (current != null && !current.isDartCoreObject) {
+    final LibraryElement owningLib = current.library;
+
+    // `fields` gives only the declarations on `current`, not inherited ones.
+    for (final FieldElement f in current.fields) {
+      if (f.isStatic || f.isSynthetic || f.isPrivate) continue;
+      if (seen.containsKey(f.name)) continue; // overridden
+
+      final DartType dt = f.type;
+      final Uri uri = importForType(dt, owningLib);
+
+      seen[f.name] = _FieldInfo(
+        f.name,
+        dt.getDisplayString(withNullability: true),
+        uri,
+        dt,
+      );
+    }
+
+    final InterfaceType? superType = current.supertype;
+    current = superType?.element as ClassElement?;
+  }
+
+  return seen.values.toList(growable: false);
 }
 
 Uri importForType(DartType type, LibraryElement targetLib) {
@@ -201,7 +217,9 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Sets this [$c] document atomically by getting first then setting.
   Future<void> setAtomic($c Function($c?) txn) => setSelfAtomicRaw<$c>(txn);
   
-  Future<void> mutate({\n    ${mutate.$2.join(',\n    ')}\n  }) =>
+  Future<void> mutate({\n    ${mutate.$2.followedBy([
+          "bool \$z = false"
+        ]).join(',\n    ')}\n  }) =>
     updateSelfRaw<$c>({ 
       ${mutate.$3.join(",\n      ")}
     });
@@ -231,7 +249,9 @@ extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
   Future<void> set${t}Atomic($t Function($t?) txn) => setUniqueAtomic<$t>(txn);
   Future<void> ensure${t}Exists($t or) => ensureExistsUnique<$t>(or);
   $t ${lowCamel(t)}Model() => modelUnique<$t>();
-  Future<void> mutate$t({\n    ${mutateU.$2.join(',\n    ')}\n  }) =>
+  Future<void> mutate$t({\n    ${mutateU.$2.followedBy([
+              "bool \$z = false"
+            ]).join(',\n    ')}\n  }) =>
     updateUnique<$t>({ 
       ${mutateU.$3.join(",\n      ")}
     });
@@ -257,7 +277,9 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
   Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
   Future<void> ensure${t}Exists(String id, $t or) => \$ensureExists<$t>(id, or);
   $t ${lowCamel(t)}Model(String id) => \$model<$t>();
-  Future<void> mutate$t({\n    required String id,\n    ${mutateC.$2.join(',\n    ')}\n  }) =>
+  Future<void> mutate$t({\n    required String id,\n    ${mutateC.$2.followedBy([
+              "bool \$z = false"
+            ]).join(',\n    ')}\n  }) =>
     \$update<$t>(id, { 
       ${mutateC.$3.join(",\n      ")}
     });
@@ -348,7 +370,7 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
         } else if (_isEnum(f.dartType)) {
           accept = true;
           impl.add("if(${f.name} != null) '${f.name}': ${f.name}.name");
-        } else if (f.type.startsWith("List<")) {
+        } else if (f.type.startsWith("List<") || f.type.startsWith("Set<")) {
           DartType? itype = innerOfList(f.dartType);
           if (itype == null) {
             continue;
