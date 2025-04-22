@@ -34,7 +34,7 @@ abstract class ModelAccessor {
 
   Future<T?> getCachedUnique<T extends ModelCrud>();
 
-  Future<T?> getSelf<T extends ModelCrud>();
+  Future<T?> getSelfRaw<T extends ModelCrud>();
 
   T? findModel<T extends ModelCrud>();
 
@@ -46,22 +46,22 @@ abstract class ModelAccessor {
 
   Future<void> setIfAbsentUnique<T extends ModelCrud>(T model);
 
-  Future<void> setSelf<T extends ModelCrud>(T self);
+  Future<void> setSelfRaw<T extends ModelCrud>(T self);
 
-  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn);
+  Future<void> setSelfAtomicRaw<T extends ModelCrud>(T Function(T? data) txn);
 
   Future<void> set<T extends ModelCrud>(String id, T model);
 
-  Stream<T> streamSelf<T extends ModelCrud>();
+  Stream<T> streamSelfRaw<T extends ModelCrud>();
 
   Future<void> update<T extends ModelCrud>(
       String id, Map<String, dynamic> updates);
 
   Future<void> updateUnique<T extends ModelCrud>(Map<String, dynamic> updates);
 
-  Future<void> updateSelf<T extends ModelCrud>(Map<String, dynamic> updates);
+  Future<void> updateSelfRaw<T extends ModelCrud>(Map<String, dynamic> updates);
 
-  Future<void> deleteSelf<T extends ModelCrud>();
+  Future<void> deleteSelfRaw<T extends ModelCrud>();
 
   Future<void> setAtomic<T extends ModelCrud>(
       String id, T Function(T? data) txn);
@@ -93,5 +93,14 @@ abstract class ModelAccessor {
 
   Future<void> changeUnique<T extends ModelCrud>(T before, T after);
 
-  Future<void> changeSelf<T extends ModelCrud>(T before, T after);
+  Future<void> changeSelfRaw<T extends ModelCrud>(T before, T after);
+
+  Future<void> updateAtomic<T extends ModelCrud>(
+      String id, Map<String, dynamic> Function(T? initial) updater);
+
+  Future<void> updateUniqueAtomic<T extends ModelCrud>(
+      Map<String, dynamic> Function(T? initial) updater);
+
+  Future<void> updateSelfAtomicRaw<T extends ModelCrud>(
+      Map<String, dynamic> Function(T? initial) updater);
 }

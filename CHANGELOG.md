@@ -1,3 +1,10 @@
+# 3.0.0
+* Code Gen!
+
+# 2.3.15
+* Atomic Update & Change API
+* Update Atomic Functions 
+
 # 2.3.14
 * Change API
 

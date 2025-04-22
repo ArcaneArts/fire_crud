@@ -189,7 +189,7 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
 
   @override
-  Future<void> setSelf<T extends ModelCrud>(T self) {
+  Future<void> setSelfRaw<T extends ModelCrud>(T self) {
     return FirestoreDatabase.instance
         .document(documentPath!)
         .set(getCrud<T>().toMap(self));
@@ -200,7 +200,8 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
       ModelUtility.push<T>($models, $pathOf, model, id);
 
   @override
-  Future<void> updateSelf<T extends ModelCrud>(Map<String, dynamic> updates) =>
+  Future<void> updateSelfRaw<T extends ModelCrud>(
+          Map<String, dynamic> updates) =>
       updates.isEmpty
           ? Future.value()
           : FirestoreDatabase.instance.document(documentPath!).update(updates);
@@ -211,13 +212,13 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, id);
 
   @override
-  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) =>
+  Future<void> setSelfAtomicRaw<T extends ModelCrud>(T Function(T? data) txn) =>
       FirestoreDatabase.instance.document(documentPath!).setAtomic((data) =>
           getCrud<T>()
               .toMap(txn(data == null ? null : getCrud<T>().fromMap(data))));
 
   @override
-  Stream<T> streamSelf<T extends ModelCrud>() => FirestoreDatabase.instance
+  Stream<T> streamSelfRaw<T extends ModelCrud>() => FirestoreDatabase.instance
       .document(documentPath!)
       .stream
       .map((event) => (event.data == null
@@ -243,7 +244,7 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
       ModelUtility.update<T>($models, $pathOf, updates, null);
 
   @override
-  Future<T?> getSelf<T extends ModelCrud>() async {
+  Future<T?> getSelfRaw<T extends ModelCrud>() async {
     if (documentPath == null) {
       throw Exception("Cannot get self without a document path");
     }
@@ -255,7 +256,7 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
   }
 
   @override
-  Future<void> deleteSelf<T extends ModelCrud>() {
+  Future<void> deleteSelfRaw<T extends ModelCrud>() {
     if (documentPath == null) {
       throw Exception("Cannot delete self without a document path");
     }
@@ -295,9 +296,25 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
   }
 
   @override
-  Future<void> changeSelf<T extends ModelCrud>(T before, T after) {
+  Future<void> changeSelfRaw<T extends ModelCrud>(T before, T after) {
     FireModel<T> c = ModelUtility.selectChildModel<T>($models)!;
-    return updateSelf<T>(
+    return updateSelfRaw<T>(
         ModelUtility.getUpdates(c.toMap(before), c.toMap(after)));
   }
+
+  @override
+  Future<void> updateAtomic<T extends ModelCrud>(
+          String id, Map<String, dynamic> Function(T? initial) updater) =>
+      ModelUtility.updateAtomic<T>($models, $pathOf, updater);
+
+  @override
+  Future<void> updateUniqueAtomic<T extends ModelCrud>(
+          Map<String, dynamic> Function(T? initial) updater) =>
+      ModelUtility.updateAtomic<T>($models, $pathOf, updater, null);
+
+  @override
+  Future<void> updateSelfAtomicRaw<T extends ModelCrud>(
+          Map<String, dynamic> Function(T? initial) txn) =>
+      FirestoreDatabase.instance.document(documentPath!).updateAtomic(
+          (data) => txn(data == null ? null : getCrud<T>().fromMap(data)));
 }

@@ -65,33 +65,37 @@ void main(){
 }
 ```
 
-2. Use them!
+2. Run the build runner!
+3. Use them!
 
 ```dart
 // Add a user
-User user = await $crud.add<User>(User()..name = "Dan" ..age = 21);
+User user = await $crud.addUser(User()..name = "Dan" ..age = 21);
 
 // Add a note without getting the user by using .model instead of .pull
 Note added = await $crud.model<User>("USERID")
-  .add<Note>(Note()
+  .addNote(Note()
       ..title = "My Note"
       ..content = "This is my note");
 
 // Update a note 
-await user.set<Note>(added..title = "My new note");
+await user.setNote(added..title = "My new note");
 
 // Update a note atomically (txn get then set)
-await user.setAtomic<Note>((now) => now..title = "My new note");
+await user.setAtomicNote((now) => now..title = "My new note");
 
 // Select all notes ordered by title
-List<Note> notes = await user.pullAll<Note>(query: (q) => q.orderBy("title"));
+List<Note> notes = await user.getNotes(query: (q) => q.orderBy("title"));
 
 // Stream all notes
-Stream<List<Note>> notesStream = user.streamAll<Note>();
+Stream<List<Note>> notesStream = user.streamNotes();
 
 // Get neighbor note
-added.parentModel<User>().get<Note>("another id");
+added.parentModel<User>().getNote("another id");
 
 // Delete
-user.delete<Note>("noteID");
+user.deleteNote("noteID");
+
+// Delete the user
+user.delete();
 ```

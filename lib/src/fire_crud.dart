@@ -213,32 +213,33 @@ class FireCrud extends ModelAccessor {
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, null);
 
   @override
-  Stream<T> streamSelf<T extends ModelCrud>() {
+  Stream<T> streamSelfRaw<T extends ModelCrud>() {
     throw Exception("streamSelf is not supported on the root accessor");
   }
 
   @override
-  Future<void> deleteSelf<T extends ModelCrud>() {
+  Future<void> deleteSelfRaw<T extends ModelCrud>() {
     throw Exception("deleteSelf is not supported on the root accessor");
   }
 
   @override
-  Future<void> setSelf<T extends ModelCrud>(T self) {
+  Future<void> setSelfRaw<T extends ModelCrud>(T self) {
     throw Exception("setSelf is not supported on the root accessor");
   }
 
   @override
-  Future<void> updateSelf<T extends ModelCrud>(Map<String, dynamic> updates) =>
+  Future<void> updateSelfRaw<T extends ModelCrud>(
+          Map<String, dynamic> updates) =>
       throw Future.error(
           Exception("updateSelf is not supported on the root accessor"));
 
   @override
-  Future<void> setSelfAtomic<T extends ModelCrud>(T Function(T? data) txn) {
+  Future<void> setSelfAtomicRaw<T extends ModelCrud>(T Function(T? data) txn) {
     throw Exception("setSelfAtomic is not supported on the root accessor");
   }
 
   @override
-  Future<T?> getSelf<T extends ModelCrud>() {
+  Future<T?> getSelfRaw<T extends ModelCrud>() {
     throw Exception("getSelf is not supported on the root accessor");
   }
 
@@ -281,9 +282,24 @@ class FireCrud extends ModelAccessor {
   }
 
   @override
-  Future<void> changeSelf<T extends ModelCrud>(T before, T after) =>
+  Future<void> changeSelfRaw<T extends ModelCrud>(T before, T after) =>
       throw Future.error(
           Exception("changeSelf is not supported on the root accessor"));
+
+  @override
+  Future<void> updateAtomic<T extends ModelCrud>(
+          String id, Map<String, dynamic> Function(T? initial) updater) =>
+      ModelUtility.updateAtomic<T>($models, $pathOf, updater);
+
+  @override
+  Future<void> updateUniqueAtomic<T extends ModelCrud>(
+          Map<String, dynamic> Function(T? initial) updater) =>
+      ModelUtility.updateAtomic<T>($models, $pathOf, updater, null);
+
+  @override
+  Future<void> updateSelfAtomicRaw<T extends ModelCrud>(
+          Map<String, dynamic> Function(T? initial) updater) =>
+      throw Exception("updateSelfAtomic is not supported on the root accessor");
 
   @override
   T? findModel<T extends ModelCrud>() {

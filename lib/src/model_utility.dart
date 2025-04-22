@@ -134,6 +134,17 @@ class ModelUtility {
     await FirestoreDatabase.instance.document(pathOf(c, id)).update(data);
   }
 
+  static Future<void> updateAtomic<T extends ModelCrud>(
+      List<FireModel> models,
+      String Function(FireModel c, [String? id]) pathOf,
+      Map<String, dynamic> Function(T? initial) data,
+      [String? id]) async {
+    FireModel<T> c = selectChildModel<T>(models)!;
+    await FirestoreDatabase.instance
+        .document(pathOf(c, id))
+        .updateAtomic((init) => data(init == null ? null : c.fromMap(init)));
+  }
+
   static Future<T> add<T extends ModelCrud>(
       String collectionPath,
       List<FireModel> models,
