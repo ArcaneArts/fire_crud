@@ -16,17 +16,17 @@ abstract class ModelAccessor {
       [CollectionReference Function(CollectionReference ref)? query]);
 
   /// Gets a child model type in a subcollection of this document. The type determines what the subcollection actually is.
-  T model<T extends ModelCrud>([String? id]);
+  T $model<T extends ModelCrud>([String? id]);
 
   T modelUnique<T extends ModelCrud>();
 
   T modelInCollection<T extends ModelCrud>(String collection, [String? id]);
 
-  Future<bool> exists<T extends ModelCrud>(String id);
+  Future<bool> $exists<T extends ModelCrud>(String id);
 
   Future<bool> existsUnique<T extends ModelCrud>();
 
-  Future<T?> get<T extends ModelCrud>(String id);
+  Future<T?> $get<T extends ModelCrud>(String id);
 
   Future<T?> getUnique<T extends ModelCrud>();
 
@@ -38,7 +38,7 @@ abstract class ModelAccessor {
 
   T? findModel<T extends ModelCrud>();
 
-  Future<T> ensureExists<T extends ModelCrud>(String id, T model);
+  Future<T> $ensureExists<T extends ModelCrud>(String id, T model);
 
   Future<T> ensureExistsUnique<T extends ModelCrud>(T model);
 
@@ -50,11 +50,11 @@ abstract class ModelAccessor {
 
   Future<void> setSelfAtomicRaw<T extends ModelCrud>(T Function(T? data) txn);
 
-  Future<void> set<T extends ModelCrud>(String id, T model);
+  Future<void> $set<T extends ModelCrud>(String id, T model);
 
   Stream<T> streamSelfRaw<T extends ModelCrud>();
 
-  Future<void> update<T extends ModelCrud>(
+  Future<void> $update<T extends ModelCrud>(
       String id, Map<String, dynamic> updates);
 
   Future<void> updateUnique<T extends ModelCrud>(Map<String, dynamic> updates);
@@ -63,22 +63,22 @@ abstract class ModelAccessor {
 
   Future<void> deleteSelfRaw<T extends ModelCrud>();
 
-  Future<void> setAtomic<T extends ModelCrud>(
+  Future<void> $setAtomic<T extends ModelCrud>(
       String id, T Function(T? data) txn);
 
   Future<void> setUnique<T extends ModelCrud>(T model);
 
   Future<void> setUniqueAtomic<T extends ModelCrud>(T Function(T? data) txn);
 
-  Future<void> delete<T extends ModelCrud>(String id);
+  Future<void> $delete<T extends ModelCrud>(String id);
 
   Future<void> deleteUnique<T extends ModelCrud>();
 
-  Stream<T?> stream<T extends ModelCrud>(String id);
+  Stream<T?> $stream<T extends ModelCrud>(String id);
 
   Stream<T?> streamUnique<T extends ModelCrud>();
 
-  Future<T> add<T extends ModelCrud>(T model);
+  Future<T> $add<T extends ModelCrud>(T model);
 
   Future<List<T>> getAll<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
@@ -86,16 +86,16 @@ abstract class ModelAccessor {
   Stream<List<T>> streamAll<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
 
-  Future<int> count<T extends ModelCrud>(
+  Future<int> $count<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
 
-  Future<void> change<T extends ModelCrud>(String id, T before, T after);
+  Future<void> $change<T extends ModelCrud>(String id, T before, T after);
 
   Future<void> changeUnique<T extends ModelCrud>(T before, T after);
 
   Future<void> changeSelfRaw<T extends ModelCrud>(T before, T after);
 
-  Future<void> updateAtomic<T extends ModelCrud>(
+  Future<void> $updateAtomic<T extends ModelCrud>(
       String id, Map<String, dynamic> Function(T? initial) updater);
 
   Future<void> updateUniqueAtomic<T extends ModelCrud>(

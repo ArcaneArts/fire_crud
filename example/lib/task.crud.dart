@@ -140,14 +140,14 @@ extension XFCrudBase$Task on Task {
 extension XFCrud$Task$Subtask on Task {
   Future<List<Subtask>> getSubtasks([CollectionReference Function(CollectionReference ref)? query]) => getAll<Subtask>(query);
   Stream<List<Subtask>> streamSubtasks([CollectionReference Function(CollectionReference ref)? query]) => streamAll<Subtask>(query);
-  Future<void> setSubtask(String id, Subtask value) => set<Subtask>(id, value);
-  Future<void> updateSubtask(String id, Map<String, dynamic> updates) => update<Subtask>(id, updates);
-  Stream<Subtask?> streamSubtask(String id) => stream<Subtask>(id);
-  Future<void> deleteSubtask(String id) => delete<Subtask>(id);
-  Future<void> addSubtask(Subtask value) => add<Subtask>(value);
-  Future<void> setSubtaskAtomic(String id, Subtask Function(Subtask?) txn) => setAtomic<Subtask>(id, txn);
-  Future<void> ensureSubtaskExists(String id, Subtask or) => ensureExists<Subtask>(id, or);
-  Subtask subtaskModel(String id) => model<Subtask>();
+  Future<void> setSubtask(String id, Subtask value) => $set<Subtask>(id, value);
+  Future<void> updateSubtask(String id, Map<String, dynamic> updates) => $update<Subtask>(id, updates);
+  Stream<Subtask?> streamSubtask(String id) => $stream<Subtask>(id);
+  Future<void> deleteSubtask(String id) => $delete<Subtask>(id);
+  Future<void> addSubtask(Subtask value) => $add<Subtask>(value);
+  Future<void> setSubtaskAtomic(String id, Subtask Function(Subtask?) txn) => $setAtomic<Subtask>(id, txn);
+  Future<void> ensureSubtaskExists(String id, Subtask or) => $ensureExists<Subtask>(id, or);
+  Subtask subtaskModel(String id) => $model<Subtask>();
   Future<void> mutateSubtask({
     required String id,
     
@@ -217,7 +217,7 @@ extension XFCrud$Task$Subtask on Task {
     /// Removes the [en] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
     bool deleteEn = false
   }) =>
-    update<Subtask>(id, { 
+    $update<Subtask>(id, { 
       if(title != null) 'title': title,
       if(deleteTitle) 'title': FieldValue.delete(),
       if(a != null) 'a': a,

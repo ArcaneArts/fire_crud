@@ -223,10 +223,10 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
         b.writeln('''
 /// CRUD Extensions for (UNIQUE) ${cls.name}.${t}
 extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
-  Future<$t> get$t() => get<$t>();
+  Future<$t?> get$t() => getUnique<$t>();
   Future<void> set$t($t value) => setUnique<$t>(value);
   Future<void> delete$t() => deleteUnique<$t>();
-  Stream<$t> stream$t() => streamUnique<$t>();
+  Stream<$t?> stream$t() => streamUnique<$t>(); 
   Future<void> update$t(Map<String, dynamic> updates) => updateUnique<$t>(updates);
   Future<void> set${t}Atomic($t Function($t?) txn) => setUniqueAtomic<$t>(txn);
   Future<void> ensure${t}Exists($t or) => ensureExistsUnique<$t>(or);
@@ -248,16 +248,17 @@ extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
 extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
   Future<List<$t>> get$plural([CollectionReference Function(CollectionReference ref)? query]) => getAll<$t>(query);
   Stream<List<$t>> stream$plural([CollectionReference Function(CollectionReference ref)? query]) => streamAll<$t>(query);
-  Future<void> set$t(String id, $t value) => set<$t>(id, value);
-  Future<void> update$t(String id, Map<String, dynamic> updates) => update<$t>(id, updates);
-  Stream<$t?> stream$t(String id) => stream<$t>(id);
-  Future<void> delete$t(String id) => delete<$t>(id);
-  Future<void> add${t}($t value) => add<$t>(value);
-  Future<void> set${t}Atomic(String id, $t Function($t?) txn) => setAtomic<$t>(id, txn);
-  Future<void> ensure${t}Exists(String id, $t or) => ensureExists<$t>(id, or);
-  $t ${lowCamel(t)}Model(String id) => model<$t>();
+  Future<void> set$t(String id, $t value) => \$set<$t>(id, value);
+  Future<$t?> get$t(String id) => \$get<$t>(id);
+  Future<void> update$t(String id, Map<String, dynamic> updates) => \$update<$t>(id, updates);
+  Stream<$t?> stream$t(String id) => \$stream<$t>(id);
+  Future<void> delete$t(String id) => \$delete<$t>(id);
+  Future<$t> add${t}($t value) => \$add<$t>(value);
+  Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
+  Future<void> ensure${t}Exists(String id, $t or) => \$ensureExists<$t>(id, or);
+  $t ${lowCamel(t)}Model(String id) => \$model<$t>();
   Future<void> mutate$t({\n    required String id,\n    ${mutateC.$2.join(',\n    ')}\n  }) =>
-    update<$t>(id, { 
+    \$update<$t>(id, { 
       ${mutateC.$3.join(",\n      ")}
     });
 }

@@ -1,3 +1,12 @@
+# 3.1.1
+* Fixes
+
+# 3.1.0
+* $ everywhere
+
+# 3.0.2
+* Get Fixes
+
 # 3.0.1
 * Loosen analyzer constraint
 

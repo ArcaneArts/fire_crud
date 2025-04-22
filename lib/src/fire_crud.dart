@@ -71,7 +71,7 @@ class FireCrud extends ModelAccessor {
   List<FireModel<ModelCrud>> get $models => models;
 
   @override
-  T model<T extends ModelCrud>([String? id]) =>
+  T $model<T extends ModelCrud>([String? id]) =>
       ModelUtility.model<T>($models, $pathOf, id);
 
   @override
@@ -83,10 +83,10 @@ class FireCrud extends ModelAccessor {
       ModelUtility.modelInCollection<T>($models, $pathOf, collection, id);
 
   @override
-  Future<T> ensureExists<T extends ModelCrud>(String id, T model) async {
-    T? t = await get<T>(id);
+  Future<T> $ensureExists<T extends ModelCrud>(String id, T model) async {
+    T? t = await $get<T>(id);
     if (t == null) {
-      await set<T>(id, model);
+      await $set<T>(id, model);
       return model;
     }
 
@@ -105,7 +105,7 @@ class FireCrud extends ModelAccessor {
   }
 
   @override
-  Future<void> delete<T extends ModelCrud>(String id) =>
+  Future<void> $delete<T extends ModelCrud>(String id) =>
       ModelUtility.delete<T>($models, $pathOf, id);
 
   @override
@@ -113,7 +113,7 @@ class FireCrud extends ModelAccessor {
       ModelUtility.delete<T>($models, $pathOf, null);
 
   @override
-  Stream<T?> stream<T extends ModelCrud>(String id) =>
+  Stream<T?> $stream<T extends ModelCrud>(String id) =>
       ModelUtility.stream<T>($models, $pathOf, id);
 
   @override
@@ -121,7 +121,7 @@ class FireCrud extends ModelAccessor {
       ModelUtility.stream<T>($models, $pathOf, null);
 
   @override
-  Future<T> add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
+  Future<T> $add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
       ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
       $models,
       $pathOf,
@@ -144,7 +144,7 @@ class FireCrud extends ModelAccessor {
           query);
 
   @override
-  Future<int> count<T extends ModelCrud>(
+  Future<int> $count<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.count<T>(
           ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
@@ -178,7 +178,7 @@ class FireCrud extends ModelAccessor {
   }
 
   @override
-  Future<T?> get<T extends ModelCrud>(String id) =>
+  Future<T?> $get<T extends ModelCrud>(String id) =>
       ModelUtility.pull<T>($models, $pathOf, id);
 
   @override
@@ -186,11 +186,11 @@ class FireCrud extends ModelAccessor {
       ModelUtility.pull<T>($models, $pathOf, null);
 
   @override
-  Future<void> set<T extends ModelCrud>(String id, T model) =>
+  Future<void> $set<T extends ModelCrud>(String id, T model) =>
       ModelUtility.push<T>($models, $pathOf, model, id);
 
   @override
-  Future<void> update<T extends ModelCrud>(
+  Future<void> $update<T extends ModelCrud>(
           String id, Map<String, dynamic> updates) =>
       ModelUtility.update<T>($models, $pathOf, updates, id);
 
@@ -204,7 +204,7 @@ class FireCrud extends ModelAccessor {
       ModelUtility.push<T>($models, $pathOf, model, null);
 
   @override
-  Future<void> setAtomic<T extends ModelCrud>(
+  Future<void> $setAtomic<T extends ModelCrud>(
           String id, T Function(T? data) txn) =>
       ModelUtility.pushAtomic<T>($models, $pathOf, txn, id);
 
@@ -244,8 +244,8 @@ class FireCrud extends ModelAccessor {
   }
 
   @override
-  Future<bool> exists<T extends ModelCrud>(String id) =>
-      get<T>(id).then((value) => value != null).catchError((e) => false);
+  Future<bool> $exists<T extends ModelCrud>(String id) =>
+      $get<T>(id).then((value) => value != null).catchError((e) => false);
 
   @override
   Future<bool> existsUnique<T extends ModelCrud>() =>
@@ -253,7 +253,7 @@ class FireCrud extends ModelAccessor {
 
   @override
   Future<void> setIfAbsent<T extends ModelCrud>(String id, T model) =>
-      exists(id).then((v) => v ? Future.value() : set<T>(id, model));
+      $exists(id).then((v) => v ? Future.value() : $set<T>(id, model));
 
   @override
   Future<void> setIfAbsentUnique<T extends ModelCrud>(T model) =>
@@ -268,9 +268,9 @@ class FireCrud extends ModelAccessor {
       ModelUtility.pullCached<T>($models, $pathOf, null);
 
   @override
-  Future<void> change<T extends ModelCrud>(String id, T before, T after) {
+  Future<void> $change<T extends ModelCrud>(String id, T before, T after) {
     FireModel<T> c = ModelUtility.selectChildModel<T>($models)!;
-    return update<T>(
+    return $update<T>(
         id, ModelUtility.getUpdates(c.toMap(before), c.toMap(after)));
   }
 
@@ -287,7 +287,7 @@ class FireCrud extends ModelAccessor {
           Exception("changeSelf is not supported on the root accessor"));
 
   @override
-  Future<void> updateAtomic<T extends ModelCrud>(
+  Future<void> $updateAtomic<T extends ModelCrud>(
           String id, Map<String, dynamic> Function(T? initial) updater) =>
       ModelUtility.updateAtomic<T>($models, $pathOf, updater);
 
