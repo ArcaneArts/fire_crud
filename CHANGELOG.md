@@ -1,3 +1,6 @@
+# 3.0.1
+* Loosen analyzer constraint
+
 # 3.0.0
 * Code Gen!
 
