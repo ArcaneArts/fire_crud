@@ -307,7 +307,9 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
         type == "String?" ||
         type == "String" ||
         type == "bool?" ||
-        type == "bool") {
+        type == "bool" ||
+        type == "Map<String, dynamic>" ||
+        type == "Map<String, dynamic>?") {
       return "";
     }
 
