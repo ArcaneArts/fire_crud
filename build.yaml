@@ -1,7 +1,7 @@
 builders:
   model_crud_builder:
     import: "package:fire_crud/gen/crud_builder.dart"
-    builder_factories: ["modelCrudPerFileBuilder"]
-    build_extensions: { ".dart": [".crud.dart"] }
+    builder_factories: ["modelCrudBuilder"]
+    build_extensions: { r"$lib$": ["gen/crud.gen.dart"] }
     auto_apply: dependents
     build_to: source

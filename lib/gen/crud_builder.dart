@@ -2,4 +2,4 @@ import 'package:build/build.dart';
 
 import 'crud_extension_builder.dart';
 
-Builder modelCrudPerFileBuilder(BuilderOptions _) => ModelCrudPerFileBuilder();
+Builder modelCrudBuilder(BuilderOptions _) => ModelCrudPerFileBuilder();

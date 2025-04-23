@@ -5,6 +5,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
+import 'package:glob/glob.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:toxic/extensions/string.dart';
 
@@ -80,57 +81,55 @@ class ModelCrudPerFileBuilder implements Builder {
   }
 
   @override
-  final Map<String, List<String>> buildExtensions =
-      const <String, List<String>>{
-    '.dart': <String>['.crud.dart']
-  };
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+        r'$lib$': <String>['gen/crud.gen.dart'],
+      };
+  static Glob $dartFilesInLib = Glob('lib/**.dart');
 
   @override
   Future<void> build(BuildStep step) async {
-    AssetId input = step.inputId;
-    if (input.path.endsWith('.g.dart') ||
-        input.path.endsWith('.mapper.dart') ||
-        input.path.endsWith('.crud.dart')) return;
-
-    LibraryElement lib = await step.resolver.libraryFor(input);
-    Iterable<ClassElement> classes = LibraryReader(lib).classes;
+    assert(step.inputId.path == r'$lib$');
 
     List<String> outLines = <String>[];
     List<String> imports = <String>[];
-    for (ClassElement cls in classes) {
-      if (!_hasModelCrudMixin(cls)) continue;
+    await for (AssetId asset in step.findAssets($dartFilesInLib)) {
+      if (!await step.resolver.isLibrary(asset)) continue;
+      LibraryElement lib = await step.resolver.libraryFor(asset);
+      Iterable<ClassElement> classes = LibraryReader(lib).classes;
 
-      PropertyAccessorElement? childGetter =
-          cls.lookUpGetter('childModels', cls.library);
+      for (ClassElement cls in classes) {
+        if (!_hasModelCrudMixin(cls)) continue;
 
-      if (childGetter == null) continue;
+        PropertyAccessorElement? childGetter =
+            cls.lookUpGetter('childModels', cls.library);
 
-      AstNode? getterNode =
-          await step.resolver.astNodeFor(childGetter, resolve: true);
-      if (getterNode is! MethodDeclaration) continue;
+        if (childGetter == null) continue;
 
-      FunctionBody body = getterNode.body;
-      Expression? expr = switch (body) {
-        ExpressionFunctionBody(:final expression) => expression,
-        BlockFunctionBody(:final block) =>
-          block.statements.whereType<ReturnStatement>().first.expression,
-        _ => null
-      };
-      if (expr is! ListLiteral) continue;
+        AstNode? getterNode =
+            await step.resolver.astNodeFor(childGetter, resolve: true);
+        if (getterNode is! MethodDeclaration) continue;
 
-      List<_ChildModelInfo> infos = _readFireModels(expr, cls.library);
+        FunctionBody body = getterNode.body;
+        Expression? expr = switch (body) {
+          ExpressionFunctionBody(:final expression) => expression,
+          BlockFunctionBody(:final block) =>
+            block.statements.whereType<ReturnStatement>().first.expression,
+          _ => null
+        };
+        if (expr is! ListLiteral) continue;
 
-      (String, String) o = _genCrudExtensions(cls, infos);
-      imports.add(o.$1);
-      outLines.add(o.$2);
+        List<_ChildModelInfo> infos = _readFireModels(expr, cls.library);
+        imports.add("import '${cls.source.uri}';");
+        (String, String) o = _genCrudExtensions(cls, infos);
+        imports.add(o.$1);
+        outLines.add(o.$2);
+      }
     }
 
-    if (outLines.isEmpty) return;
-
-    AssetId output = input.changeExtension('.crud.dart');
+    AssetId out = AssetId(step.inputId.package, 'lib/gen/crud.gen.dart');
     await step.writeAsString(
-      output,
-      '// GENERATED – do not modify.\nimport \'${input.uri}\';\n${imports.join("\n")}\n' +
+      out,
+      '// GENERATED – do not modify.\n${imports.join("\n")}\n' +
           outLines.join('\n'),
     );
   }
