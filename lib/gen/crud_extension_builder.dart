@@ -217,7 +217,7 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Sets this [$c] document atomically by getting first then setting.
   Future<void> setAtomic($c Function($c?) txn) => setSelfAtomicRaw<$c>(txn);
   
-  Future<void> mutate({\n    ${mutate.$2.followedBy([
+  Future<void> modify({\n    ${mutate.$2.followedBy([
           "bool \$z = false"
         ]).join(',\n    ')}\n  }) =>
     updateSelfRaw<$c>({ 
@@ -249,7 +249,7 @@ extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
   Future<void> set${t}Atomic($t Function($t?) txn) => setUniqueAtomic<$t>(txn);
   Future<void> ensure${t}Exists($t or) => ensureExistsUnique<$t>(or);
   $t ${lowCamel(t)}Model() => modelUnique<$t>();
-  Future<void> mutate$t({\n    ${mutateU.$2.followedBy([
+  Future<void> modify$t({\n    ${mutateU.$2.followedBy([
               "bool \$z = false"
             ]).join(',\n    ')}\n  }) =>
     updateUnique<$t>({ 
@@ -277,7 +277,7 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
   Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
   Future<void> ensure${t}Exists(String id, $t or) => \$ensureExists<$t>(id, or);
   $t ${lowCamel(t)}Model(String id) => \$model<$t>();
-  Future<void> mutate$t({\n    required String id,\n    ${mutateC.$2.followedBy([
+  Future<void> modify$t({\n    required String id,\n    ${mutateC.$2.followedBy([
               "bool \$z = false"
             ]).join(',\n    ')}\n  }) =>
     \$update<$t>(id, { 
@@ -337,30 +337,19 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
         impl.add("if(${f.name} != null) '${f.name}': ${f.name}");
 
         if (f.type == "int?" || f.type == "int") {
-          params.add(cmt("int? increment${f.name.capitalize()}",
+          params.add(cmt("int? delta${f.name.capitalize()}",
               comment:
-                  "Increases [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
+                  "Changes (increment/decrement) [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
           impl.add(
-              "if(increment${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(increment${f.name.capitalize()})");
-
-          params.add(cmt("int? decrement${f.name.capitalize()}",
-              comment:
-                  "Reduces [${f.name}] by an amount atomically using FieldValue.decrement() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
-          impl.add(
-              "if(decrement${f.name.capitalize()} != null) '${f.name}': FieldValue.decrement(decrement${f.name.capitalize()})");
+              "if(delta${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(delta${f.name.capitalize()})");
         }
 
         if (f.type == "double?" || f.type == "double") {
-          params.add(cmt("double? increment${f.name.capitalize()}",
+          params.add(cmt("double? delta${f.name.capitalize()}",
               comment:
-                  "Increases [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
+                  "Changes (increment/decrement) [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
           impl.add(
-              "if(increment${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(increment${f.name.capitalize()})");
-          params.add(cmt("double? decrement${f.name.capitalize()}",
-              comment:
-                  "Reduces [${f.name}] by an amount atomically using FieldValue.decrement() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
-          impl.add(
-              "if(decrement${f.name.capitalize()} != null) '${f.name}': FieldValue.decrement(decrement${f.name.capitalize()})");
+              "if(delta${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(delta${f.name.capitalize()})");
         }
       } else {
         if (f.type == "DateTime" || f.type == "DateTime?") {
