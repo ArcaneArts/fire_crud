@@ -300,7 +300,6 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
 
   String mapVX(DartType dt) {
     String type = dt.name!;
-    print("ITYPE IS $type");
     if (type == "DateTime" || type == "DateTime?") {
       return ".toIso8601String()";
     }
@@ -317,8 +316,8 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
         type == "String" ||
         type == "bool?" ||
         type == "bool" ||
-        type == "Map<String, dynamic>" ||
-        type == "Map<String, dynamic>?") {
+        type == "Map" ||
+        type == "Map?") {
       return "";
     }
 
