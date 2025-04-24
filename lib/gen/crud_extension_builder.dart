@@ -1,4 +1,3 @@
-// lib/gen/model_crud_parser_builder.dart
 import 'dart:async';
 
 import 'package:analyzer/dart/ast/ast.dart';
