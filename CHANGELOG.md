@@ -1,3 +1,6 @@
+# 3.1.6
+* Fixes
+
 # 3.1.5
 * Fixes maps
 

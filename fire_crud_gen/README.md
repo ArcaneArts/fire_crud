@@ -1,0 +1,1 @@
+This is the generator for [fire_crud](https://pub.dev/packages/fire_crud) package.

@@ -2,6 +2,11 @@ CRUD operations for Firestore
 
 > I have gotten sick and tired of firebases poor mapping system, and tired of having to make something like this but half baked for every project i start. Inf is already boring enough, so lets stop doing so much of it.
 
+```dart
+flutter pub add fire_crud
+flutter pub add fire_crud_gen --dev
+```
+
 # Setup
 This project uses [fire_api](https://pub.dev/packages/fire_api) for the firestore database. You will need to set it up before you can use this package.
 
