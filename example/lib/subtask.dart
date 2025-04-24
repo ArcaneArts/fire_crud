@@ -1,11 +1,9 @@
-import 'package:dart_mappable/dart_mappable.dart';
+import 'package:artifact/artifact.dart';
 import 'package:example/en.dart';
 import 'package:fire_crud/fire_crud.dart';
 
-part 'subtask.mapper.dart';
-
-@MappableClass()
-class Subtask with SubtaskMappable, ModelCrud {
+@artifact
+class Subtask with ModelCrud {
   final String? title;
   final int? a;
   final int b;

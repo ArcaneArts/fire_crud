@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:artifact/artifact.dart';
 import 'package:build/build.dart';
 import 'package:glob/glob.dart';
 import 'package:source_gen/source_gen.dart';
@@ -85,6 +86,7 @@ class ModelCrudPerFileBuilder implements Builder {
         r'$lib$': <String>['gen/crud.gen.dart'],
       };
   static Glob $dartFilesInLib = Glob('lib/**.dart');
+  static final TypeChecker $artifactChecker = TypeChecker.fromRuntime(Artifact);
 
   @override
   Future<void> build(BuildStep step) async {
@@ -120,6 +122,12 @@ class ModelCrudPerFileBuilder implements Builder {
 
         List<_ChildModelInfo> infos = _readFireModels(expr, cls.library);
         imports.add("import '${cls.source.uri}';");
+
+        if ($artifactChecker.hasAnnotationOf(cls, throwOnUnresolved: false)) {
+          imports.add(
+              "import '${cls.source.uri.replace(path: "${cls.source.uri.pathSegments[0]}/gen/artifacts.gen.dart")}';");
+        }
+
         (String, String) o = _genCrudExtensions(cls, infos);
         imports.add(o.$1);
         outLines.add(o.$2);
@@ -292,6 +300,7 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
 
   String mapVX(DartType dt) {
     String type = dt.name!;
+    print("ITYPE IS $type");
     if (type == "DateTime" || type == "DateTime?") {
       return ".toIso8601String()";
     }

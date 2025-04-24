@@ -1,11 +1,10 @@
-import 'package:dart_mappable/dart_mappable.dart';
+import 'package:artifact/artifact.dart';
+import 'package:example/gen/artifacts.gen.dart';
 import 'package:example/subtask.dart';
 import 'package:fire_crud/fire_crud.dart';
 
-part 'task.mapper.dart';
-
-@MappableClass()
-class Task with TaskMappable, ModelCrud {
+@artifact
+class Task with ModelCrud {
   final List<Subtask> subtasks;
   final List<DateTime> dates;
   final List<int> ints;
@@ -31,7 +30,7 @@ class Task with TaskMappable, ModelCrud {
     FireModel<Subtask>(
       collection: "subtask",
       toMap: (m) => m.toMap(),
-      fromMap: (m) => SubtaskMapper.fromMap(m),
+      fromMap: (m) => $Subtask.fromMap(m),
       model: Subtask(dt: DateTime.timestamp()),
     ),
   ];
