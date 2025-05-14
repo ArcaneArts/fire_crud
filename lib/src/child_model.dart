@@ -1,6 +1,8 @@
 import 'package:fire_crud/fire_crud.dart';
 import 'package:pylon_codec/pylon_codec.dart';
 
+Map<Type, int> _rc = {};
+
 /// Represents a model that can be used in its parent. These tell fire_crud the type, and how to convert to and from a map.
 /// Make sure to actually specify the T type otherwise it may not work correctly.
 class FireModel<T extends ModelCrud> {
@@ -32,6 +34,12 @@ class FireModel<T extends ModelCrud> {
       this.exclusiveDocumentId});
 
   void registerTypeModels() {
+    if ((_rc[model.runtimeType] ?? 0) > 10) {
+      return;
+    }
+
+    _rc[model.runtimeType] = (_rc[model.runtimeType] ?? 0) + 1;
+
     registerPylonCodec(model);
 
     for (FireModel i in model.childModels) {
