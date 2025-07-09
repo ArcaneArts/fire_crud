@@ -20,7 +20,11 @@ class _FieldInfo {
 
 class _ChildModelInfo {
   const _ChildModelInfo(
-      this.typeName, this.isUnique, this.importUri, this.element);
+    this.typeName,
+    this.isUnique,
+    this.importUri,
+    this.element,
+  );
 
   final String typeName;
   final bool isUnique;
@@ -82,8 +86,8 @@ class ModelCrudPerFileBuilder implements Builder {
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
-        r'$lib$': <String>['gen/crud.gen.dart'],
-      };
+    r'$lib$': <String>['gen/crud.gen.dart'],
+  };
   static Glob $dartFilesInLib = Glob('lib/**.dart');
   static final TypeChecker $artifactChecker = TypeChecker.fromRuntime(Artifact);
 
@@ -101,13 +105,17 @@ class ModelCrudPerFileBuilder implements Builder {
       for (ClassElement cls in classes) {
         if (!_hasModelCrudMixin(cls)) continue;
 
-        PropertyAccessorElement? childGetter =
-            cls.lookUpGetter('childModels', cls.library);
+        PropertyAccessorElement? childGetter = cls.lookUpGetter(
+          'childModels',
+          cls.library,
+        );
 
         if (childGetter == null) continue;
 
-        AstNode? getterNode =
-            await step.resolver.astNodeFor(childGetter, resolve: true);
+        AstNode? getterNode = await step.resolver.astNodeFor(
+          childGetter,
+          resolve: true,
+        );
         if (getterNode is! MethodDeclaration) continue;
 
         FunctionBody body = getterNode.body;
@@ -115,7 +123,7 @@ class ModelCrudPerFileBuilder implements Builder {
           ExpressionFunctionBody(:final expression) => expression,
           BlockFunctionBody(:final block) =>
             block.statements.whereType<ReturnStatement>().first.expression,
-          _ => null
+          _ => null,
         };
         if (expr is! ListLiteral) continue;
 
@@ -124,7 +132,8 @@ class ModelCrudPerFileBuilder implements Builder {
 
         if ($artifactChecker.hasAnnotationOf(cls, throwOnUnresolved: false)) {
           imports.add(
-              "import '${cls.source.uri.replace(path: "${cls.source.uri.pathSegments[0]}/gen/artifacts.gen.dart")}';");
+            "import '${cls.source.uri.replace(path: "${cls.source.uri.pathSegments[0]}/gen/artifacts.gen.dart")}';",
+          );
         }
 
         (String, String) o = _genCrudExtensions(cls, infos);
@@ -156,7 +165,9 @@ class ModelCrudPerFileBuilder implements Builder {
   }
 
   List<_ChildModelInfo> _readFireModels(
-      ListLiteral literal, LibraryElement owningLibrary) {
+    ListLiteral literal,
+    LibraryElement owningLibrary,
+  ) {
     List<_ChildModelInfo> result = <_ChildModelInfo>[];
 
     for (CollectionElement elt in literal.elements) {
@@ -170,12 +181,19 @@ class ModelCrudPerFileBuilder implements Builder {
       if (dt is! InterfaceType) continue;
 
       bool unique = elt.argumentList.arguments.whereType<NamedExpression>().any(
-          (NamedExpression ne) => ne.name.label.name == 'exclusiveDocumentId');
+        (NamedExpression ne) => ne.name.label.name == 'exclusiveDocumentId',
+      );
 
       Uri importUri = _computeImportUri(dt, owningLibrary);
 
-      result.add(_ChildModelInfo(dt.getDisplayString(withNullability: false),
-          unique, importUri, dt.element as ClassElement));
+      result.add(
+        _ChildModelInfo(
+          dt.getDisplayString(withNullability: false),
+          unique,
+          importUri,
+          dt.element as ClassElement,
+        ),
+      );
     }
     return result;
   }
@@ -191,15 +209,19 @@ class ModelCrudPerFileBuilder implements Builder {
       info.type == "bool?";
 
   (String, String) _genCrudExtensions(
-      ClassElement cls, List<_ChildModelInfo> infos) {
+    ClassElement cls,
+    List<_ChildModelInfo> infos,
+  ) {
     StringBuffer b = StringBuffer();
     StringBuffer importsX = StringBuffer();
     List<String> imports = [];
 
     String c = cls.name;
     List<_FieldInfo> fields = fieldsOf(cls);
-    (List<String>, List<String>, List<String>) mutate =
-        mutateParams(fields, cls);
+    (List<String>, List<String>, List<String>) mutate = mutateParams(
+      fields,
+      cls,
+    );
     imports.addAll(mutate.$1);
 
     b.writeln('''
@@ -223,9 +245,7 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Sets this [$c] document atomically by getting first then setting.
   Future<void> setAtomic($c Function($c?) txn) => setSelfAtomicRaw<$c>(txn);
   
-  Future<void> modify({\n    ${mutate.$2.followedBy([
-          "bool \$z = false"
-        ]).join(',\n    ')}\n  }) =>
+  Future<void> modify({\n    ${mutate.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
     updateSelfRaw<$c>({ 
       ${mutate.$3.join(",\n      ")}
     });
@@ -240,8 +260,10 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
 
       if (info.isUnique) {
         List<_FieldInfo> fieldsU = fieldsOf(info.element);
-        (List<String>, List<String>, List<String>) mutateU =
-            mutateParams(fieldsU, info.element);
+        (List<String>, List<String>, List<String>) mutateU = mutateParams(
+          fieldsU,
+          info.element,
+        );
         imports.addAll(mutateU.$1);
 
         b.writeln('''
@@ -255,9 +277,7 @@ extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
   Future<void> set${t}Atomic($t Function($t?) txn) => setUniqueAtomic<$t>(txn);
   Future<void> ensure${t}Exists($t or) => ensureExistsUnique<$t>(or);
   $t ${lowCamel(t)}Model() => modelUnique<$t>();
-  Future<void> modify$t({\n    ${mutateU.$2.followedBy([
-              "bool \$z = false"
-            ]).join(',\n    ')}\n  }) =>
+  Future<void> modify$t({\n    ${mutateU.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
     updateUnique<$t>({ 
       ${mutateU.$3.join(",\n      ")}
     });
@@ -266,8 +286,10 @@ extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
       } else {
         String plural = '${t}s';
         List<_FieldInfo> fieldsC = fieldsOf(info.element);
-        (List<String>, List<String>, List<String>) mutateC =
-            mutateParams(fieldsC, info.element);
+        (List<String>, List<String>, List<String>) mutateC = mutateParams(
+          fieldsC,
+          info.element,
+        );
         imports.addAll(mutateC.$1);
         b.writeln('''
 /// CRUD Extensions for ${cls.name}.${t}
@@ -282,10 +304,8 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
   Future<$t> add${t}($t value) => \$add<$t>(value);
   Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
   Future<void> ensure${t}Exists(String id, $t or) => \$ensureExists<$t>(id, or);
-  $t ${lowCamel(t)}Model(String id) => \$model<$t>();
-  Future<void> modify$t({\n    required String id,\n    ${mutateC.$2.followedBy([
-              "bool \$z = false"
-            ]).join(',\n    ')}\n  }) =>
+  $t ${lowCamel(t)}Model(String id) => \$model<$t>(id);
+  Future<void> modify$t({\n    required String id,\n    ${mutateC.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
     \$update<$t>(id, { 
       ${mutateC.$3.join(",\n      ")}
     });
@@ -325,7 +345,9 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
 
   // import param impl
   (List<String>, List<String>, List<String>) mutateParams(
-      List<_FieldInfo> fields, ClassElement cls) {
+    List<_FieldInfo> fields,
+    ClassElement cls,
+  ) {
     List<String> imports = [];
     List<String> params = [];
     List<String> impl = [];
@@ -345,25 +367,36 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
         impl.add("if(${f.name} != null) '${f.name}': ${f.name}");
 
         if (f.type == "int?" || f.type == "int") {
-          params.add(cmt("int? delta${f.name.capitalize()}",
+          params.add(
+            cmt(
+              "int? delta${f.name.capitalize()}",
               comment:
-                  "Changes (increment/decrement) [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
+                  "Changes (increment/decrement) [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.",
+            ),
+          );
           impl.add(
-              "if(delta${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(delta${f.name.capitalize()})");
+            "if(delta${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(delta${f.name.capitalize()})",
+          );
         }
 
         if (f.type == "double?" || f.type == "double") {
-          params.add(cmt("double? delta${f.name.capitalize()}",
+          params.add(
+            cmt(
+              "double? delta${f.name.capitalize()}",
               comment:
-                  "Changes (increment/decrement) [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value."));
+                  "Changes (increment/decrement) [${f.name}] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.",
+            ),
+          );
           impl.add(
-              "if(delta${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(delta${f.name.capitalize()})");
+            "if(delta${f.name.capitalize()} != null) '${f.name}': FieldValue.increment(delta${f.name.capitalize()})",
+          );
         }
       } else {
         if (f.type == "DateTime" || f.type == "DateTime?") {
           accept = true;
           impl.add(
-              "if(${f.name} != null) '${f.name}': ${f.name}.toIso8601String()");
+            "if(${f.name} != null) '${f.name}': ${f.name}.toIso8601String()",
+          );
         } else if (_isEnum(f.dartType)) {
           accept = true;
           impl.add("if(${f.name} != null) '${f.name}': ${f.name}.name");
@@ -376,18 +409,26 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
           Uri iuri = importForType(itype, cls.library); // helper below
           imports.add("import '$iuri';");
 
-          params.add(cmt(
+          params.add(
+            cmt(
               "${f.type.endsWith("?") ? f.type : "${f.type}?"} add${f.name.capitalize()}",
               comment:
-                  "Adds multiple [${itype.name}] to the [${f.name}] field atomically using FieldValue.arrayUnion(). See https://cloud.google.com/firestore/docs/manage-data/add-data#update_elements_in_an_array"));
-          params.add(cmt(
+                  "Adds multiple [${itype.name}] to the [${f.name}] field atomically using FieldValue.arrayUnion(). See https://cloud.google.com/firestore/docs/manage-data/add-data#update_elements_in_an_array",
+            ),
+          );
+          params.add(
+            cmt(
               "${f.type.endsWith("?") ? f.type : "${f.type}?"} remove${f.name.capitalize()}",
               comment:
-                  "Removes one or more [${itype.name}] to the [${f.name}] field atomically using FieldValue.arrayRemove(). See https://cloud.google.com/firestore/docs/manage-data/add-data#update_elements_in_an_array"));
+                  "Removes one or more [${itype.name}] to the [${f.name}] field atomically using FieldValue.arrayRemove(). See https://cloud.google.com/firestore/docs/manage-data/add-data#update_elements_in_an_array",
+            ),
+          );
           impl.add(
-              "if(add${f.name.capitalize()} != null && add${f.name.capitalize()}.isNotEmpty) '${f.name}': FieldValue.arrayUnion(add${f.name.capitalize()}.map((v) => v${mapVX(itype)}).toList())");
+            "if(add${f.name.capitalize()} != null && add${f.name.capitalize()}.isNotEmpty) '${f.name}': FieldValue.arrayUnion(add${f.name.capitalize()}.map((v) => v${mapVX(itype)}).toList())",
+          );
           impl.add(
-              "if(remove${f.name.capitalize()} != null && remove${f.name.capitalize()}.isNotEmpty) '${f.name}': FieldValue.arrayRemove(remove${f.name.capitalize()}.map((v) => v${mapVX(itype)}).toList())");
+            "if(remove${f.name.capitalize()} != null && remove${f.name.capitalize()}.isNotEmpty) '${f.name}': FieldValue.arrayRemove(remove${f.name.capitalize()}.map((v) => v${mapVX(itype)}).toList())",
+          );
 
           accept = true;
         } else if (!f.type.startsWith("Map<")) {
@@ -397,18 +438,26 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
       }
 
       if (accept) {
-        params.add(cmt(
+        params.add(
+          cmt(
             '${f.type.endsWith("?") ? f.type : "${f.type}?"} ${f.name}',
             comment:
-                "Replaces the value of [${f.name}] with a new value atomically."));
+                "Replaces the value of [${f.name}] with a new value atomically.",
+          ),
+        );
         imports.add('import "${importForType(f.dartType, cls.library)}";');
       }
 
-      params.add(cmt('bool delete${f.name.capitalize()} = false',
+      params.add(
+        cmt(
+          'bool delete${f.name.capitalize()} = false',
           comment:
-              "Removes the [${f.name}] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields"));
+              "Removes the [${f.name}] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields",
+        ),
+      );
       impl.add(
-          "if(delete${f.name.capitalize()}) '${f.name}': FieldValue.delete()");
+        "if(delete${f.name.capitalize()}) '${f.name}': FieldValue.delete()",
+      );
     }
 
     return (imports.toSet().toList(), params, impl);

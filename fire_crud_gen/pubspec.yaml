@@ -1,6 +1,6 @@
 name: fire_crud_gen
 description: Generator for fire crud
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/ArcaneArts/fire_crud
 environment:
   sdk: ^3.7.0
