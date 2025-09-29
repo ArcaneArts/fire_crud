@@ -41,13 +41,14 @@ class CollectionViewer<T extends ModelCrud> {
   _QSub? _windowSub;
   (int, int)? _window;
   int? _lastSizeCheck;
+  List<String> _prevWindowIds = [];
 
   CollectionViewer(
       {required this.crud,
       this.query,
       this.streamWindow = 50,
       this.streamWindowPadding = 9,
-      this.memorySize = 256,
+      this.memorySize = 512,
       this.limitedSizeDoubleCheckCountThreshold = 10000,
       this.sizeCheckInterval = const Duration(seconds: 30),
       this.streamRetargetCooldown = const Duration(seconds: 3)}) {
@@ -124,37 +125,38 @@ class CollectionViewer<T extends ModelCrud> {
         await getAt(start);
         _windowStream =
             _q.startAt(_indexCache[start]!).limit(streamWindow).stream;
-        _windowSub = _windowStream!.listen((event) {
+
+        _windowSub = _windowStream!.listen((List<DocumentSnapshot> event) {
           _log(
               "Window: [${_window!.$1} to ${_window!.$2}] received stream update.");
           int g = 0;
-          for (DocSnap i in event) {
-            capture(start + g++, i);
-          }
-
+          Set<String> currentIds = event.map((i) => i.id).toSet();
           bool sizeChange = false;
 
-          for (DocumentSnapshot i in event) {
-            if (i.changeType == DocumentChangeType.removed) {
-              _indexCache.removeWhere((key, value) => value.id == i.id);
+          for (String prevId in _prevWindowIds) {
+            if (!currentIds.contains(prevId)) {
+              _indexCache.removeWhere((key, value) => value.id == prevId);
               sizeChange = true;
-              _log(
-                  "Stream detected document removal, removed index: ${i.id} at $g (SIZE CHANGED)");
-            } else if (i.changeType == DocumentChangeType.added) {
-              if (_indexCache.values.any((v) => i.id == v.id)) {
-              } else {
-                sizeChange = true;
-                _log(
-                    "Stream detected document addition: ${i.id} at $g (SIZE CHANGED)");
-              }
+              _log("Stream detected removal: $prevId (SIZE CHANGED)");
             }
           }
+          for (DocumentSnapshot i in event) {
+            if (!_prevWindowIds.contains(i.id)) {
+              sizeChange = true;
+              _log("Stream detected addition: ${i.id} (SIZE CHANGED)");
+            }
+          }
+
+          for (DocSnap i in event) {
+            capture(_window!.$1 + g++, i);
+          }
+
+          _prevWindowIds = currentIds.toList(); // Update tracker
 
           if (sizeChange) {
             _log("Size Changed, clearing cache.");
             clear();
           }
-
           _onWindowUpdate();
         });
 
@@ -272,21 +274,21 @@ class CollectionViewer<T extends ModelCrud> {
     if (_cacheSize != null && _cacheSize! < 1) {
       _lastIndex = 0;
       _indexCache.clear();
-
-      bool ignoreFirst = true;
-
-      _emptyListener ??=
-          _q.limit(1).stream.map((event) => event.isNotEmpty).listen((event) {
-        if (ignoreFirst) {
-          ignoreFirst = false;
-          return;
-        }
-
-        if (event) {
+      bool expectedEmpty = true;
+      _emptyListener ??= _q
+          .limit(1)
+          .stream
+          .map((event) => event.isNotEmpty)
+          .listen((nonEmpty) {
+        if (expectedEmpty && nonEmpty) {
+          expectedEmpty = false;
           _cacheSize = null;
           _emptyListener?.cancel();
           _emptyListener = null;
           _onWindowUpdate();
+        } else {
+          expectedEmpty =
+              false; // Initial was already non-empty (raced add) or became empty (ignore)
         }
       });
     }
