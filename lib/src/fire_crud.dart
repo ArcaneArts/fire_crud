@@ -2,7 +2,13 @@ import 'package:collection_walker/collection_walker.dart';
 import 'package:fire_api/fire_api.dart';
 import 'package:fire_crud/fire_crud.dart';
 
-FireCrud get $crud => FireCrud.instance();
+RootFireCrud get $crud => RootFireCrud.instance();
+
+class RootFireCrud extends FireCrud {
+  static RootFireCrud? _instance;
+  RootFireCrud._() : super._();
+  factory RootFireCrud.instance() => _instance ??= RootFireCrud._();
+}
 
 /// A class that provides CRUD operations for Firestore.
 class FireCrud extends ModelAccessor {
@@ -11,7 +17,7 @@ class FireCrud extends ModelAccessor {
 
   FireCrud._();
 
-  factory FireCrud.instance() => _instance ??= FireCrud._();
+  factory FireCrud.instance() => RootFireCrud._instance ??= RootFireCrud._();
 
   List<FireModel> models = [];
 

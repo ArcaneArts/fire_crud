@@ -1,3 +1,6 @@
+# 3.1.7
+* Support root gen
+
 # 3.1.6
 * Fixes
 

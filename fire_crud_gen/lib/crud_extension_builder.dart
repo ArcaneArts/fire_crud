@@ -97,6 +97,8 @@ class ModelCrudPerFileBuilder implements Builder {
 
     List<String> outLines = <String>[];
     List<String> imports = <String>[];
+    List<ClassElement> allClasses = [];
+    List<ClassElement> foundParentOf = [];
     await for (AssetId asset in step.findAssets($dartFilesInLib)) {
       if (!await step.resolver.isLibrary(asset)) continue;
       LibraryElement lib = await step.resolver.libraryFor(asset);
@@ -111,6 +113,8 @@ class ModelCrudPerFileBuilder implements Builder {
         );
 
         if (childGetter == null) continue;
+
+        allClasses.add(cls);
 
         AstNode? getterNode = await step.resolver.astNodeFor(
           childGetter,
@@ -128,6 +132,7 @@ class ModelCrudPerFileBuilder implements Builder {
         if (expr is! ListLiteral) continue;
 
         List<_ChildModelInfo> infos = _readFireModels(expr, cls.library);
+        foundParentOf.addAll(infos.map((i) => i.element));
         imports.add("import '${cls.source.uri}';");
 
         if ($artifactChecker.hasAnnotationOf(cls, throwOnUnresolved: false)) {
@@ -142,10 +147,18 @@ class ModelCrudPerFileBuilder implements Builder {
       }
     }
 
+    List<ClassElement> roots =
+        allClasses.where((c) => !foundParentOf.contains(c)).toList();
+    for (ClassElement i in roots) {
+      (String, String) o = _genRootCrudExtensions(i);
+      imports.add(o.$1);
+      outLines.add(o.$2);
+    }
+
     AssetId out = AssetId(step.inputId.package, 'lib/gen/crud.gen.dart');
     await step.writeAsString(
       out,
-      '// GENERATED – do not modify.\n${imports.join("\n")}\n' +
+      '// GENERATED – do not modify.\n${imports.join("\n").split("\n").toSet().join("\n")}\n' +
           outLines.join('\n'),
     );
   }
@@ -208,6 +221,54 @@ class ModelCrudPerFileBuilder implements Builder {
       info.type == "bool" ||
       info.type == "bool?";
 
+  (String, String) _genRootCrudExtensions(ClassElement cls) {
+    StringBuffer b = StringBuffer();
+    StringBuffer importsX = StringBuffer();
+    List<String> imports = [];
+
+    String c = cls.name;
+    List<_FieldInfo> fields = fieldsOf(cls);
+    (List<String>, List<String>, List<String>) mutate = mutateParams(
+      fields,
+      cls,
+    );
+    imports.addAll(mutate.$1);
+
+    String t = cls.name;
+    String plural = '${t}s';
+    List<_FieldInfo> fieldsC = fieldsOf(cls);
+    (List<String>, List<String>, List<String>) mutateC = mutateParams(
+      fieldsC,
+      cls,
+    );
+    b.writeln('''
+/// Root CRUD Extensions for RootFireCrud
+extension XFCrudRoot\$${cls.name} on RootFireCrud {
+  Future<int> count$plural([CollectionReference Function(CollectionReference ref)? query]) => \$count<$t>(query);
+  Future<List<$t>> get$plural([CollectionReference Function(CollectionReference ref)? query]) => getAll<$t>(query);
+  Stream<List<$t>> stream$plural([CollectionReference Function(CollectionReference ref)? query]) => streamAll<$t>(query);
+  Future<void> set$t(String id, $t value) => \$set<$t>(id, value);
+  Future<$t?> get$t(String id) => \$get<$t>(id);
+  Future<void> update$t(String id, Map<String, dynamic> updates) => \$update<$t>(id, updates);
+  Stream<$t?> stream$t(String id) => \$stream<$t>(id);
+  Future<void> delete$t(String id) => \$delete<$t>(id);
+  Future<$t> add$t($t value) => \$add<$t>(value);
+  Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
+  Future<void> ensure${t}Exists(String id, $t or) => \$ensureExists<$t>(id, or);
+  $t ${lowCamel(t)}Model(String id) => \$model<$t>(id);
+  Future<void> modify$t({\n    required String id,\n    ${mutateC.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
+    \$update<$t>(id, { 
+      ${mutateC.$3.join(",\n      ")}
+    });
+}
+    ''');
+
+    imports.add("import 'package:fire_api/fire_api.dart';");
+
+    importsX.writeln(imports.toSet().join("\n"));
+    return (importsX.toString(), b.toString());
+  }
+
   (String, String) _genCrudExtensions(
     ClassElement cls,
     List<_ChildModelInfo> infos,
@@ -223,6 +284,7 @@ class ModelCrudPerFileBuilder implements Builder {
       cls,
     );
     imports.addAll(mutate.$1);
+    imports.add("import 'package:fire_crud/fire_crud.dart';");
 
     b.writeln('''
 /// CRUD Extensions for ${cls.name}
@@ -292,8 +354,9 @@ extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
         );
         imports.addAll(mutateC.$1);
         b.writeln('''
-/// CRUD Extensions for ${cls.name}.${t}
-extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
+/// CRUD Extensions for ${cls.name}.$t
+extension XFCrud\$${cls.name}\$$t on ${cls.name} {
+  Future<int> count$plural([CollectionReference Function(CollectionReference ref)? query]) => \$count<$t>(query);
   Future<List<$t>> get$plural([CollectionReference Function(CollectionReference ref)? query]) => getAll<$t>(query);
   Stream<List<$t>> stream$plural([CollectionReference Function(CollectionReference ref)? query]) => streamAll<$t>(query);
   Future<void> set$t(String id, $t value) => \$set<$t>(id, value);
@@ -313,7 +376,7 @@ extension XFCrud\$${cls.name}\$${t} on ${cls.name} {
 ''');
       }
     }
-    importsX.writeln(imports.join("\n"));
+    importsX.writeln(imports.toSet().join("\n"));
     return (importsX.toString(), b.toString());
   }
 
