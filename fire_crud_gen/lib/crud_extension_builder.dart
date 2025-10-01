@@ -158,7 +158,7 @@ class ModelCrudPerFileBuilder implements Builder {
     AssetId out = AssetId(step.inputId.package, 'lib/gen/crud.gen.dart');
     await step.writeAsString(
       out,
-      '// GENERATED – do not modify.\n${imports.join("\n").split("\n").toSet().join("\n")}\n' +
+      '// GENERATED – do not modify.\n${(imports.join("\n").split("\n").map((i) => i.replaceAll("'", '"').trim()).toSet()..removeAll(["import '';", 'import "";'])).join("\n")}\n' +
           outLines.join('\n'),
     );
   }
@@ -244,18 +244,47 @@ class ModelCrudPerFileBuilder implements Builder {
     b.writeln('''
 /// Root CRUD Extensions for RootFireCrud
 extension XFCrudRoot\$${cls.name} on RootFireCrud {
+  /// Counts the number of [$t] in the collection optionally filtered by [query]
   Future<int> count$plural([CollectionReference Function(CollectionReference ref)? query]) => \$count<$t>(query);
+  
+  /// Gets all [$t] in the collection optionally filtered by [query]
   Future<List<$t>> get$plural([CollectionReference Function(CollectionReference ref)? query]) => getAll<$t>(query);
+  
+  /// Opens a stream of all [$t] in the collection optionally filtered by [query]
   Stream<List<$t>> stream$plural([CollectionReference Function(CollectionReference ref)? query]) => streamAll<$t>(query);
+  
+  /// Sets the [$t] document with [id] to a new value
   Future<void> set$t(String id, $t value) => \$set<$t>(id, value);
+  
+  /// Gets the [$t] document with [id]
   Future<$t?> get$t(String id) => \$get<$t>(id);
+  
+  /// Gets the [$t] document with [id] and caches it for the next time
+  Future<$t?> get${t}Cached(String id) => getCached<$t>(id);
+  
+  /// Updates properties of the [$t] document with [id] with {"fieldName": VALUE, ...}
   Future<void> update$t(String id, Map<String, dynamic> updates) => \$update<$t>(id, updates);
+  
+  /// Opens a stream of the [$t] document with [id]
   Stream<$t?> stream$t(String id) => \$stream<$t>(id);
+  
+  /// Deletes the [$t] document with [id]
   Future<void> delete$t(String id) => \$delete<$t>(id);
+  
+  /// Adds a new [$t] document with a new id and returns the created model with the id set
   Future<$t> add$t($t value) => \$add<$t>(value);
+  
+  /// Sets the [$t] document with [id] atomically by getting first then setting.
   Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
+  
+  /// Ensures that the [$t] document with [id] exists, if not it will be created with [or]
   Future<void> ensure${t}Exists(String id, $t or) => \$ensureExists<$t>(id, or);
+  
+  /// Gets a model instance of [$t] bound with [id] that can be used to access child models 
+  /// without network io.
   $t ${lowCamel(t)}Model(String id) => \$model<$t>(id);
+  
+  /// Modifies properties of the [$t] document with [id] atomically.
   Future<void> modify$t({\n    required String id,\n    ${mutateC.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
     \$update<$t>(id, { 
       ${mutateC.$3.join(",\n      ")}
@@ -264,7 +293,6 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
     ''');
 
     imports.add("import 'package:fire_api/fire_api.dart';");
-
     importsX.writeln(imports.toSet().join("\n"));
     return (importsX.toString(), b.toString());
   }
@@ -331,14 +359,35 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
         b.writeln('''
 /// CRUD Extensions for (UNIQUE) ${cls.name}.${t}
 extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
+  /// Gets the [$t] document (as a unique child)
   Future<$t?> get$t() => getUnique<$t>();
+  
+  /// Gets the [$t] document (as a unique child) and caches it for the next time
+  Future<$t?> get${t}Cached() => getCachedUnique<$t>();
+  
+  /// Sets the [$t] document (as a unique child) to a new value
   Future<void> set$t($t value) => setUnique<$t>(value);
+  
+  /// Deletes the [$t] document (as a unique child)
   Future<void> delete$t() => deleteUnique<$t>();
+  
+  /// Streams the [$t] document (as a unique child)
   Stream<$t?> stream$t() => streamUnique<$t>(); 
+  
+  /// Updates properties of the [$t] document (as a unique child) with {"fieldName": VALUE, ...}
   Future<void> update$t(Map<String, dynamic> updates) => updateUnique<$t>(updates);
+  
+  /// Sets the [$t] document (as a unique child) atomically by getting first then setting.
   Future<void> set${t}Atomic($t Function($t?) txn) => setUniqueAtomic<$t>(txn);
+  
+  /// Ensures that the [$t] document (as a unique child) exists, if not it will be created with [or]
   Future<void> ensure${t}Exists($t or) => ensureExistsUnique<$t>(or);
+  
+  /// Gets a model instance of [$t] bound with the unique id that can be used to access child models
+  /// without network io (unique child).
   $t ${lowCamel(t)}Model() => modelUnique<$t>();
+  
+  /// Modifies properties of the [$t] document (as a unique child) atomically.
   Future<void> modify$t({\n    ${mutateU.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
     updateUnique<$t>({ 
       ${mutateU.$3.join(",\n      ")}
@@ -356,18 +405,47 @@ extension XFCrudU\$${cls.name}\$${t} on ${cls.name} {
         b.writeln('''
 /// CRUD Extensions for ${cls.name}.$t
 extension XFCrud\$${cls.name}\$$t on ${cls.name} {
+  /// Counts the number of [$t] inside [${cls.name}] in the collection optionally filtered by [query]
   Future<int> count$plural([CollectionReference Function(CollectionReference ref)? query]) => \$count<$t>(query);
+  
+  /// Gets all [$t] inside [${cls.name}] in the collection optionally filtered by [query]
   Future<List<$t>> get$plural([CollectionReference Function(CollectionReference ref)? query]) => getAll<$t>(query);
+  
+  /// Opens a stream of all [$t] inside [${cls.name}] in the collection optionally filtered by [query]
   Stream<List<$t>> stream$plural([CollectionReference Function(CollectionReference ref)? query]) => streamAll<$t>(query);
+  
+  /// Sets the [$t] inside [${cls.name}] document with [id] to a new value
   Future<void> set$t(String id, $t value) => \$set<$t>(id, value);
+  
+  /// Gets the [$t] inside [${cls.name}] document with [id]
   Future<$t?> get$t(String id) => \$get<$t>(id);
+  
+  /// Gets the [$t] inside [${cls.name}] document with [id] and caches it for the next time
+  Future<$t?> get${t}Cached(String id) => getCached<$t>(id);
+  
+  /// Updates properties of the [$t] inside [${cls.name}] document with [id] with {"fieldName": VALUE, ...}
   Future<void> update$t(String id, Map<String, dynamic> updates) => \$update<$t>(id, updates);
+  
+  /// Opens a stream of the [$t] inside [${cls.name}] document with [id]
   Stream<$t?> stream$t(String id) => \$stream<$t>(id);
+  
+  /// Deletes the [$t] inside [${cls.name}] document with [id]
   Future<void> delete$t(String id) => \$delete<$t>(id);
+  
+  /// Adds a new [$t] inside [${cls.name}] document with a new id and returns the created model with the id set
   Future<$t> add${t}($t value) => \$add<$t>(value);
+  
+  /// Sets the [$t] inside [${cls.name}] document with [id] atomically by getting first then setting.
   Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
+  
+  /// Ensures that the [$t] inside [${cls.name}] document with [id] exists, if not it will be created with [or]
   Future<void> ensure${t}Exists(String id, $t or) => \$ensureExists<$t>(id, or);
+  
+  /// Gets a model instance of [$t] inside [${cls.name}] bound with [id] that can be used to access child models
+  /// without network io.
   $t ${lowCamel(t)}Model(String id) => \$model<$t>(id);
+  
+  /// Modifies properties of the [$t] inside [${cls.name}] document with [id] atomically.
   Future<void> modify$t({\n    required String id,\n    ${mutateC.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
     \$update<$t>(id, { 
       ${mutateC.$3.join(",\n      ")}

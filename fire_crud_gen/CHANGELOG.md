@@ -1,3 +1,7 @@
+# 1.0.3
+* More docs
+* Added getCached methods
+
 # 1.0.2
 * Root gen
 * Add count methods
