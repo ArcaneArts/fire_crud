@@ -51,6 +51,18 @@ class ModelUtility {
     );
   }
 
+  static Future<void> deleteAll<T extends ModelCrud>(
+      String collectionPath, List<FireModel> models,
+      [CollectionReference Function(CollectionReference ref)? query]) {
+    FireModel<T> c = selectChildModelCollectionByType<T>(models)!;
+    return (query
+                ?.call(FirestoreDatabase.instance.collection(collectionPath)) ??
+            FirestoreDatabase.instance.collection(collectionPath))
+        .get()
+        .then((value) => Future.wait(value.map(
+            (e) => c.withPath(e.data, e.reference.path)!.deleteSelfRaw())));
+  }
+
   static Future<List<T>> pullAll<T extends ModelCrud>(
       String collectionPath, List<FireModel> models,
       [CollectionReference Function(CollectionReference ref)? query]) {
@@ -61,6 +73,46 @@ class ModelUtility {
         .get()
         .then((value) =>
             value.map((e) => c.withPath(e.data, e.reference.path)!).toList());
+  }
+
+  static Future<ModelPage<T>?> pullPage<T extends ModelCrud>({
+    required String collectionPath,
+    required List<FireModel> models,
+    CollectionReference Function(CollectionReference ref)? query,
+    ModelPage<T>? previousPage,
+    int pageSize = 50,
+    bool reversed = false,
+  }) async {
+    FireModel<T> c = selectChildModelCollectionByType<T>(models)!;
+    CollectionReference ref =
+        (query?.call(FirestoreDatabase.instance.collection(collectionPath)) ??
+            FirestoreDatabase.instance.collection(collectionPath));
+
+    if (previousPage != null && previousPage.items.length < pageSize) {
+      return null;
+    }
+
+    DocumentPage? page = await FirestoreDatabase.instance
+        .getDocumentPageInCollection(
+            reference: ref,
+            pageSize: pageSize,
+            reversed: reversed,
+            previousPage: previousPage?._page);
+
+    if (page == null || page.documents.isEmpty) {
+      return null;
+    }
+
+    return ModelPage<T>(
+        page,
+        page.documents
+            .map((e) => c.withPath(e.data, e.reference.path)!)
+            .toList(),
+        collectionPath,
+        models,
+        pageSize,
+        query,
+        reversed);
   }
 
   static Stream<List<T>> streamAll<T extends ModelCrud>(
@@ -302,4 +354,27 @@ class ModelUtility {
     });
     return root;
   }
+}
+
+class ModelPage<T extends ModelCrud> {
+  final DocumentPage _page;
+  final List<T> items;
+  final String collectionPath;
+  final List<FireModel> models;
+  final int pageSize;
+  final CollectionReference Function(CollectionReference ref)? query;
+  final bool reversed;
+
+  ModelPage(this._page, this.items, this.collectionPath, this.models,
+      this.pageSize, this.query, this.reversed);
+
+  Future<ModelPage<T>?> nextPage() => items.length < pageSize
+      ? Future.value(null)
+      : ModelUtility.pullPage<T>(
+          collectionPath: collectionPath,
+          models: models,
+          previousPage: this,
+          pageSize: pageSize,
+          query: query,
+          reversed: reversed);
 }

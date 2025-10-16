@@ -134,6 +134,28 @@ class FireCrud extends ModelAccessor {
       model);
 
   @override
+  Future<void> deleteAll<T extends ModelCrud>(
+          [CollectionReference Function(CollectionReference ref)? query]) =>
+      ModelUtility.deleteAll<T>(
+          ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
+          $models,
+          query);
+
+  Future<ModelPage<T>?> paginate<T extends ModelCrud>({
+    int pageSize = 50,
+    bool reversed = false,
+    CollectionReference Function(CollectionReference ref)? query,
+  }) =>
+      ModelUtility.pullPage<T>(
+          collectionPath:
+              ModelUtility.selectChildModelCollectionByType<T>($models)!
+                  .collection,
+          models: $models,
+          query: query,
+          pageSize: pageSize,
+          reversed: reversed);
+
+  @override
   Future<List<T>> getAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.pullAll<T>(
@@ -246,6 +268,11 @@ class FireCrud extends ModelAccessor {
 
   @override
   Future<T?> getSelfRaw<T extends ModelCrud>() {
+    throw Exception("getSelf is not supported on the root accessor");
+  }
+
+  @override
+  Future<T?> getCachedSelfRaw<T extends ModelCrud>() {
     throw Exception("getSelf is not supported on the root accessor");
   }
 

@@ -36,6 +36,8 @@ abstract class ModelAccessor {
 
   Future<T?> getSelfRaw<T extends ModelCrud>();
 
+  Future<T?> getCachedSelfRaw<T extends ModelCrud>();
+
   T? findModel<T extends ModelCrud>();
 
   Future<T> $ensureExists<T extends ModelCrud>(String id, T model);
@@ -81,6 +83,15 @@ abstract class ModelAccessor {
   Future<T> $add<T extends ModelCrud>(T model);
 
   Future<List<T>> getAll<T extends ModelCrud>(
+      [CollectionReference Function(CollectionReference ref)? query]);
+
+  Future<ModelPage<T>?> paginate<T extends ModelCrud>({
+    int pageSize = 50,
+    bool reversed = false,
+    CollectionReference Function(CollectionReference ref)? query,
+  });
+
+  Future<void> deleteAll<T extends ModelCrud>(
       [CollectionReference Function(CollectionReference ref)? query]);
 
   Stream<List<T>> streamAll<T extends ModelCrud>(

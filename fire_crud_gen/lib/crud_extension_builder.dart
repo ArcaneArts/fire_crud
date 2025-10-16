@@ -250,6 +250,12 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
   /// Gets all [$t] in the collection optionally filtered by [query]
   Future<List<$t>> get$plural([CollectionReference Function(CollectionReference ref)? query]) => getAll<$t>(query);
   
+  /// Gets a document page starting at the beginning of the collection. Returns a [ModelPage<$t>] that contains the models and nextPage method to get the next page
+  Future<ModelPage<$t>?> paginate$plural({int pageSize = 50, bool reversed = false, CollectionReference Function(CollectionReference ref)? query}) => paginate<$t>(pageSize: pageSize, reversed: reversed, query: query);
+  
+  /// Deletes all [$t] in the collection optionally filtered by [query]
+  Future<void> deleteAll$plural([CollectionReference Function(CollectionReference ref)? query]) => deleteAll<$t>(query);
+  
   /// Opens a stream of all [$t] in the collection optionally filtered by [query]
   Stream<List<$t>> stream$plural([CollectionReference Function(CollectionReference ref)? query]) => streamAll<$t>(query);
   
@@ -320,6 +326,9 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Gets this document (self) live and returns a new instance of [$c] representing the new data
   Future<$c?> get() => getSelfRaw<$c>();
   
+  /// Gets this document (self) live and caches it for the next time, returns a new instance of [$c] representing the new data
+  Future<$c?> getCached() => getCachedSelfRaw<$c>();
+  
   /// Opens a self stream of [$c] representing this document
   Stream<$c?> stream() => streamSelfRaw<$c>();
   
@@ -335,6 +344,7 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Sets this [$c] document atomically by getting first then setting.
   Future<void> setAtomic($c Function($c?) txn) => setSelfAtomicRaw<$c>(txn);
   
+  /// Modifies properties of the [$c] document (as a unique child) atomically.
   Future<void> modify({\n    ${mutate.$2.followedBy(["bool \$z = false"]).join(',\n    ')}\n  }) =>
     updateSelfRaw<$c>({ 
       ${mutate.$3.join(",\n      ")}
@@ -410,6 +420,9 @@ extension XFCrud\$${cls.name}\$$t on ${cls.name} {
   
   /// Gets all [$t] inside [${cls.name}] in the collection optionally filtered by [query]
   Future<List<$t>> get$plural([CollectionReference Function(CollectionReference ref)? query]) => getAll<$t>(query);
+  
+  /// Gets a document page starting at the beginning of the collection. Returns a [ModelPage<$t>] that contains the models and nextPage method to get the next page
+  Future<ModelPage<$t>?> paginate$plural({int pageSize = 50, bool reversed = false, CollectionReference Function(CollectionReference ref)? query}) => paginate<$t>(pageSize: pageSize, reversed: reversed, query: query);
   
   /// Opens a stream of all [$t] inside [${cls.name}] in the collection optionally filtered by [query]
   Stream<List<$t>> stream$plural([CollectionReference Function(CollectionReference ref)? query]) => streamAll<$t>(query);

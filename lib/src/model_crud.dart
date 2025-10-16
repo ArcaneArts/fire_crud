@@ -89,12 +89,33 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
       model);
 
   @override
+  Future<void> deleteAll<T extends ModelCrud>(
+          [CollectionReference Function(CollectionReference ref)? query]) =>
+      ModelUtility.deleteAll<T>(
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
+          $models,
+          query);
+
+  @override
   Future<List<T>> getAll<T extends ModelCrud>(
           [CollectionReference Function(CollectionReference ref)? query]) =>
       ModelUtility.pullAll<T>(
           "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
           $models,
           query);
+
+  Future<ModelPage<T>?> paginate<T extends ModelCrud>({
+    int pageSize = 50,
+    bool reversed = false,
+    CollectionReference Function(CollectionReference ref)? query,
+  }) =>
+      ModelUtility.pullPage<T>(
+          collectionPath:
+              "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
+          models: $models,
+          query: query,
+          pageSize: pageSize,
+          reversed: reversed);
 
   @override
   Stream<List<T>> streamAll<T extends ModelCrud>(
@@ -252,6 +273,20 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
     return getCrud<T>().fromMap(
         (await FirestoreDatabase.instance.document(documentPath!).get()).data ??
             {})
+      ..documentPath = documentPath;
+  }
+
+  @override
+  Future<T?> getCachedSelfRaw<T extends ModelCrud>() async {
+    if (documentPath == null) {
+      throw Exception("Cannot get self without a document path");
+    }
+
+    return getCrud<T>().fromMap((await FirestoreDatabase.instance
+                .document(documentPath!)
+                .get(cached: true))
+            .data ??
+        {})
       ..documentPath = documentPath;
   }
 

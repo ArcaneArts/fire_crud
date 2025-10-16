@@ -1,3 +1,6 @@
+# 3.1.9
+* Pagination
+
 # 3.1.8
 * Fixes the recapture bug for empty collections with one item added
 * Correctly diffs the window stream to reset (reduces jank when rapidly adding/removing items in live collection)
