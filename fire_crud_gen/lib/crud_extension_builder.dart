@@ -99,6 +99,9 @@ class ModelCrudPerFileBuilder implements Builder {
     List<String> imports = <String>[];
     List<ClassElement> allClasses = [];
     List<ClassElement> foundParentOf = [];
+    Map<ClassElement, List<ClassElement>> childrenToParents = {};
+    Map<ClassElement, List<_ChildModelInfo>> childInfos = {};
+
     await for (AssetId asset in step.findAssets($dartFilesInLib)) {
       if (!await step.resolver.isLibrary(asset)) continue;
       LibraryElement lib = await step.resolver.libraryFor(asset);
@@ -130,9 +133,28 @@ class ModelCrudPerFileBuilder implements Builder {
           _ => null,
         };
         if (expr is! ListLiteral) continue;
-
         List<_ChildModelInfo> infos = _readFireModels(expr, cls.library);
+        childInfos[cls] = infos;
         foundParentOf.addAll(infos.map((i) => i.element));
+        for (_ChildModelInfo info in infos) {
+          childrenToParents
+              .putIfAbsent(info.element, () => <ClassElement>[])
+              .add(cls);
+        }
+      }
+    }
+
+    await for (AssetId asset in step.findAssets($dartFilesInLib)) {
+      if (!await step.resolver.isLibrary(asset)) continue;
+      LibraryElement lib = await step.resolver.libraryFor(asset);
+      Iterable<ClassElement> classes = LibraryReader(lib).classes;
+
+      for (ClassElement cls in classes) {
+        if (!_hasModelCrudMixin(cls)) continue;
+        if (!childInfos.containsKey(cls)) continue;
+
+        List<_ChildModelInfo> infos = childInfos[cls] ?? [];
+
         imports.add("import '${cls.source.uri}';");
 
         if ($artifactChecker.hasAnnotationOf(cls, throwOnUnresolved: false)) {
@@ -141,7 +163,11 @@ class ModelCrudPerFileBuilder implements Builder {
           );
         }
 
-        (String, String) o = _genCrudExtensions(cls, infos);
+        (String, String) o = _genCrudExtensions(
+          cls,
+          infos,
+          childrenToParents[cls] ?? [],
+        );
         imports.add(o.$1);
         outLines.add(o.$2);
       }
@@ -306,6 +332,7 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
   (String, String) _genCrudExtensions(
     ClassElement cls,
     List<_ChildModelInfo> infos,
+    List<ClassElement> parentClasses,
   ) {
     StringBuffer b = StringBuffer();
     StringBuffer importsX = StringBuffer();
@@ -321,13 +348,15 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
     imports.add("import 'package:fire_crud/fire_crud.dart';");
 
     b.writeln('''
-/// CRUD Extensions for ${cls.name}
+/// CRUD Extensions for ${cls.name}${parentClasses.isNotEmpty ? "\n/// Parent Model is ${parentClasses.map((i) => "[${i.name}]").join(" or ")}" : ""}
 extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Gets this document (self) live and returns a new instance of [$c] representing the new data
   Future<$c?> get() => getSelfRaw<$c>();
   
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [$c] representing the new data
   Future<$c?> getCached() => getCachedSelfRaw<$c>();
+  
+  ${parentClasses.map((i) => "${i.name} get parent${i.name}Model => parentModel<${i.name}>();").join("\n  ")}
   
   /// Opens a self stream of [$c] representing this document
   Stream<$c?> stream() => streamSelfRaw<$c>();

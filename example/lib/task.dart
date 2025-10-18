@@ -1,5 +1,4 @@
 import 'package:artifact/artifact.dart';
-import 'package:example/gen/artifacts.gen.dart';
 import 'package:example/subtask.dart';
 import 'package:fire_crud/fire_crud.dart';
 
@@ -27,11 +26,6 @@ class Task with ModelCrud {
 
   @override
   List<FireModel<ModelCrud>> get childModels => [
-    FireModel<Subtask>(
-      collection: "subtask",
-      toMap: (m) => m.toMap(),
-      fromMap: (m) => $Subtask.fromMap(m),
-      model: Subtask(dt: DateTime.timestamp()),
-    ),
+    FireModel<Subtask>.artifact("subtask"),
   ];
 }

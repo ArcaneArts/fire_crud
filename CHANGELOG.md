@@ -1,3 +1,6 @@
+# 3.1.10
+* Direct support for Artifact models so you can now do `FireModel<Subtask>.artifact("subtask")` instead of defining all the nonsense. Requires calling `registerFCA($artifactFromMap, $artifactToMap, $constructArtifact);` during initialization. 
+
 # 3.1.9
 * Pagination
 

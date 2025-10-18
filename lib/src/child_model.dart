@@ -3,6 +3,27 @@ import 'package:pylon_codec/pylon_codec.dart';
 
 Map<Type, int> _rc = {};
 
+Map<String, dynamic> Function(Object o)? _fcaToMap;
+T Function<T>(Map<String, dynamic> m)? _fcaFromMap;
+T Function<T>()? _fcaConstruct;
+
+void registerFCA(
+  T Function<T>(Map<String, dynamic> m) artifactFromMap,
+  Map<String, dynamic> Function(Object o) artifactToMap,
+  T Function<T>() artifactConstruct,
+) {
+  _fcaToMap = artifactToMap;
+  _fcaFromMap = artifactFromMap;
+  _fcaConstruct = artifactConstruct;
+}
+
+void _checkFCA() {
+  if (_fcaFromMap == null || _fcaToMap == null) {
+    throw Exception(
+        "FireCrud is trying to use artifact, please call `registerFCA(\$artifactFromMap, \$artifactToMap, \$constructArtifact);` during initialization.");
+  }
+}
+
 /// Represents a model that can be used in its parent. These tell fire_crud the type, and how to convert to and from a map.
 /// Make sure to actually specify the T type otherwise it may not work correctly.
 class FireModel<T extends ModelCrud> {
@@ -32,6 +53,17 @@ class FireModel<T extends ModelCrud> {
       required this.toMap,
       required this.fromMap,
       this.exclusiveDocumentId});
+
+  factory FireModel.artifact(String collectionName,
+      {String? exclusiveDocumentId}) {
+    _checkFCA();
+    return FireModel<T>(
+        collection: collectionName,
+        exclusiveDocumentId: exclusiveDocumentId,
+        model: _fcaConstruct!<T>(),
+        toMap: _fcaToMap!,
+        fromMap: _fcaFromMap!);
+  }
 
   void registerTypeModels() {
     if ((_rc[model.runtimeType] ?? 0) > 10) {

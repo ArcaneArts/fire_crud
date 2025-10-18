@@ -1,3 +1,6 @@
+# 1.0.5
+* Parent Models
+
 # 1.0.4
 * Pagination
 
