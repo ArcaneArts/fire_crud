@@ -4,6 +4,13 @@ import 'package:fire_crud/fire_crud.dart';
 
 RootFireCrud get $crud => RootFireCrud.instance();
 
+/// Wrapper for creating a FireModel with artifact.
+FireModel<T> fma<T extends ModelCrud>(String c, [String? e]) =>
+    FireModel<T>.artifact(
+      c,
+      exclusiveDocumentId: e,
+    );
+
 class RootFireCrud extends FireCrud {
   static RootFireCrud? _instance;
   RootFireCrud._() : super._();
@@ -44,6 +51,19 @@ class FireCrud extends ModelAccessor {
     }
 
     return null;
+  }
+
+  void setupArtifact(
+    T Function<T>(Map<String, dynamic> m) artifactFromMap,
+    Map<String, dynamic> Function(Object o) artifactToMap,
+    T Function<T>() artifactConstruct,
+  ) =>
+      $registerFCA(artifactFromMap, artifactToMap, artifactConstruct);
+
+  void registerModels(List<FireModel> models) {
+    for (FireModel i in models) {
+      registerModel(i);
+    }
   }
 
   void registerModel(FireModel root) {

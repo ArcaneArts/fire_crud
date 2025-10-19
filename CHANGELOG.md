@@ -1,3 +1,10 @@
+# 3.1.12
+* Added `fma` as a shorthand for `FireModel.artifact()`
+
+# 3.1.11
+* Changed `registerFCA` to `$crud.setupArtifact`
+* Added a `$crud.registerModels` convenience method to register multiple models at once.
+
 # 3.1.10
 * Direct support for Artifact models so you can now do `FireModel<Subtask>.artifact("subtask")` instead of defining all the nonsense. Requires calling `registerFCA($artifactFromMap, $artifactToMap, $constructArtifact);` during initialization. 
 

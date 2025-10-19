@@ -6,7 +6,7 @@ import 'package:fire_crud/fire_crud.dart';
 enum En { a, b, c }
 
 void main() {
-  registerFCA($artifactFromMap, $artifactToMap, $constructArtifact);
+  $crud.setupArtifact($artifactFromMap, $artifactToMap, $constructArtifact);
 
   $crud.registerModel(FireModel<Task>.artifact("task"));
 

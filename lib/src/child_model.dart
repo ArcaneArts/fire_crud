@@ -7,7 +7,7 @@ Map<String, dynamic> Function(Object o)? _fcaToMap;
 T Function<T>(Map<String, dynamic> m)? _fcaFromMap;
 T Function<T>()? _fcaConstruct;
 
-void registerFCA(
+void $registerFCA(
   T Function<T>(Map<String, dynamic> m) artifactFromMap,
   Map<String, dynamic> Function(Object o) artifactToMap,
   T Function<T>() artifactConstruct,
@@ -20,7 +20,7 @@ void registerFCA(
 void _checkFCA() {
   if (_fcaFromMap == null || _fcaToMap == null) {
     throw Exception(
-        "FireCrud is trying to use artifact, please call `registerFCA(\$artifactFromMap, \$artifactToMap, \$constructArtifact);` during initialization.");
+        "FireCrud is trying to use artifact, please call `\$crud.setupArtifact(\$artifactFromMap, \$artifactToMap, \$constructArtifact);` during initialization.");
   }
 }
 
