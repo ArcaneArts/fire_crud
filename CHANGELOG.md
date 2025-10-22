@@ -1,5 +1,5 @@
-# 3.1.12
-* Added `fma` as a shorthand for `FireModel.artifact()`
+# 3.1.13
+* Fixes FireModel<T>.artifact("collection")
 
 # 3.1.11
 * Changed `registerFCA` to `$crud.setupArtifact`

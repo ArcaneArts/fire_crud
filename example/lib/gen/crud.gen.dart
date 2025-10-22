@@ -5,8 +5,8 @@ import "package:example/subtask.dart";
 import "dart:core";
 import "package:fire_crud/fire_crud.dart";
 import "package:fire_api/fire_api.dart";
-import "package:example/en.dart";
 
+import "package:example/en.dart";
 /// CRUD Extensions for Task
 extension XFCrudBase$Task on Task {
   /// Gets this document (self) live and returns a new instance of [Task] representing the new data
@@ -133,135 +133,8 @@ extension XFCrudBase$Task on Task {
     });
 }
     
-/// CRUD Extensions for Task.Subtask
-extension XFCrud$Task$Subtask on Task {
-  /// Counts the number of [Subtask] inside [Task] in the collection optionally filtered by [query]
-  Future<int> countSubtasks([CollectionReference Function(CollectionReference ref)? query]) => $count<Subtask>(query);
-  
-  /// Gets all [Subtask] inside [Task] in the collection optionally filtered by [query]
-  Future<List<Subtask>> getSubtasks([CollectionReference Function(CollectionReference ref)? query]) => getAll<Subtask>(query);
-  
-  /// Gets a document page starting at the beginning of the collection. Returns a [ModelPage<Subtask>] that contains the models and nextPage method to get the next page
-  Future<ModelPage<Subtask>?> paginateSubtasks({int pageSize = 50, bool reversed = false, CollectionReference Function(CollectionReference ref)? query}) => paginate<Subtask>(pageSize: pageSize, reversed: reversed, query: query);
-  
-  /// Opens a stream of all [Subtask] inside [Task] in the collection optionally filtered by [query]
-  Stream<List<Subtask>> streamSubtasks([CollectionReference Function(CollectionReference ref)? query]) => streamAll<Subtask>(query);
-  
-  /// Sets the [Subtask] inside [Task] document with [id] to a new value
-  Future<void> setSubtask(String id, Subtask value) => $set<Subtask>(id, value);
-  
-  /// Gets the [Subtask] inside [Task] document with [id]
-  Future<Subtask?> getSubtask(String id) => $get<Subtask>(id);
-  
-  /// Gets the [Subtask] inside [Task] document with [id] and caches it for the next time
-  Future<Subtask?> getSubtaskCached(String id) => getCached<Subtask>(id);
-  
-  /// Updates properties of the [Subtask] inside [Task] document with [id] with {"fieldName": VALUE, ...}
-  Future<void> updateSubtask(String id, Map<String, dynamic> updates) => $update<Subtask>(id, updates);
-  
-  /// Opens a stream of the [Subtask] inside [Task] document with [id]
-  Stream<Subtask?> streamSubtask(String id) => $stream<Subtask>(id);
-  
-  /// Deletes the [Subtask] inside [Task] document with [id]
-  Future<void> deleteSubtask(String id) => $delete<Subtask>(id);
-  
-  /// Adds a new [Subtask] inside [Task] document with a new id and returns the created model with the id set
-  Future<Subtask> addSubtask(Subtask value) => $add<Subtask>(value);
-  
-  /// Sets the [Subtask] inside [Task] document with [id] atomically by getting first then setting.
-  Future<void> setSubtaskAtomic(String id, Subtask Function(Subtask?) txn) => $setAtomic<Subtask>(id, txn);
-  
-  /// Ensures that the [Subtask] inside [Task] document with [id] exists, if not it will be created with [or]
-  Future<void> ensureSubtaskExists(String id, Subtask or) => $ensureExists<Subtask>(id, or);
-  
-  /// Gets a model instance of [Subtask] inside [Task] bound with [id] that can be used to access child models
-  /// without network io.
-  Subtask subtaskModel(String id) => $model<Subtask>(id);
-  
-  /// Modifies properties of the [Subtask] inside [Task] document with [id] atomically.
-  Future<void> modifySubtask({
-    required String id,
-    
-    /// Replaces the value of [title] with a new value atomically.
-    String? title,
-    
-    /// Removes the [title] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
-    bool deleteTitle = false,
-    
-    /// Changes (increment/decrement) [a] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
-    int? deltaA,
-    
-    /// Replaces the value of [a] with a new value atomically.
-    int? a,
-    
-    /// Removes the [a] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
-    bool deleteA = false,
-    
-    /// Changes (increment/decrement) [b] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
-    int? deltaB,
-    
-    /// Replaces the value of [b] with a new value atomically.
-    int? b,
-    
-    /// Removes the [b] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
-    bool deleteB = false,
-    
-    /// Changes (increment/decrement) [c] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
-    double? deltaC,
-    
-    /// Replaces the value of [c] with a new value atomically.
-    double? c,
-    
-    /// Removes the [c] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
-    bool deleteC = false,
-    
-    /// Changes (increment/decrement) [d] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
-    double? deltaD,
-    
-    /// Replaces the value of [d] with a new value atomically.
-    double? d,
-    
-    /// Removes the [d] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
-    bool deleteD = false,
-    
-    /// Replaces the value of [dt] with a new value atomically.
-    DateTime? dt,
-    
-    /// Removes the [dt] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
-    bool deleteDt = false,
-    
-    /// Replaces the value of [en] with a new value atomically.
-    En? en,
-    
-    /// Removes the [en] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
-    bool deleteEn = false,
-    bool $z = false
-  }) =>
-    $update<Subtask>(id, { 
-      if(title != null) 'title': title,
-      if(deleteTitle) 'title': FieldValue.delete(),
-      if(a != null) 'a': a,
-      if(deltaA != null) 'a': FieldValue.increment(deltaA),
-      if(deleteA) 'a': FieldValue.delete(),
-      if(b != null) 'b': b,
-      if(deltaB != null) 'b': FieldValue.increment(deltaB),
-      if(deleteB) 'b': FieldValue.delete(),
-      if(c != null) 'c': c,
-      if(deltaC != null) 'c': FieldValue.increment(deltaC),
-      if(deleteC) 'c': FieldValue.delete(),
-      if(d != null) 'd': d,
-      if(deltaD != null) 'd': FieldValue.increment(deltaD),
-      if(deleteD) 'd': FieldValue.delete(),
-      if(dt != null) 'dt': dt.toIso8601String(),
-      if(deleteDt) 'dt': FieldValue.delete(),
-      if(en != null) 'en': en.name,
-      if(deleteEn) 'en': FieldValue.delete()
-    });
-}
-
 
 /// CRUD Extensions for Subtask
-/// Parent Model is [Task]
 extension XFCrudBase$Subtask on Subtask {
   /// Gets this document (self) live and returns a new instance of [Subtask] representing the new data
   Future<Subtask?> get() => getSelfRaw<Subtask>();
@@ -269,7 +142,7 @@ extension XFCrudBase$Subtask on Subtask {
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [Subtask] representing the new data
   Future<Subtask?> getCached() => getCachedSelfRaw<Subtask>();
   
-  Task get parentTaskModel => parentModel<Task>();
+  
   
   /// Opens a self stream of [Subtask] representing this document
   Stream<Subtask?> stream() => streamSelfRaw<Subtask>();
@@ -514,6 +387,136 @@ extension XFCrudRoot$Task on RootFireCrud {
       if(deleteSubtask) 'subtask': FieldValue.delete(),
       if(date != null) 'date': date.toIso8601String(),
       if(deleteDate) 'date': FieldValue.delete()
+    });
+}
+    
+
+/// Root CRUD Extensions for RootFireCrud
+extension XFCrudRoot$Subtask on RootFireCrud {
+  /// Counts the number of [Subtask] in the collection optionally filtered by [query]
+  Future<int> countSubtasks([CollectionReference Function(CollectionReference ref)? query]) => $count<Subtask>(query);
+  
+  /// Gets all [Subtask] in the collection optionally filtered by [query]
+  Future<List<Subtask>> getSubtasks([CollectionReference Function(CollectionReference ref)? query]) => getAll<Subtask>(query);
+  
+  /// Gets a document page starting at the beginning of the collection. Returns a [ModelPage<Subtask>] that contains the models and nextPage method to get the next page
+  Future<ModelPage<Subtask>?> paginateSubtasks({int pageSize = 50, bool reversed = false, CollectionReference Function(CollectionReference ref)? query}) => paginate<Subtask>(pageSize: pageSize, reversed: reversed, query: query);
+  
+  /// Deletes all [Subtask] in the collection optionally filtered by [query]
+  Future<void> deleteAllSubtasks([CollectionReference Function(CollectionReference ref)? query]) => deleteAll<Subtask>(query);
+  
+  /// Opens a stream of all [Subtask] in the collection optionally filtered by [query]
+  Stream<List<Subtask>> streamSubtasks([CollectionReference Function(CollectionReference ref)? query]) => streamAll<Subtask>(query);
+  
+  /// Sets the [Subtask] document with [id] to a new value
+  Future<void> setSubtask(String id, Subtask value) => $set<Subtask>(id, value);
+  
+  /// Gets the [Subtask] document with [id]
+  Future<Subtask?> getSubtask(String id) => $get<Subtask>(id);
+  
+  /// Gets the [Subtask] document with [id] and caches it for the next time
+  Future<Subtask?> getSubtaskCached(String id) => getCached<Subtask>(id);
+  
+  /// Updates properties of the [Subtask] document with [id] with {"fieldName": VALUE, ...}
+  Future<void> updateSubtask(String id, Map<String, dynamic> updates) => $update<Subtask>(id, updates);
+  
+  /// Opens a stream of the [Subtask] document with [id]
+  Stream<Subtask?> streamSubtask(String id) => $stream<Subtask>(id);
+  
+  /// Deletes the [Subtask] document with [id]
+  Future<void> deleteSubtask(String id) => $delete<Subtask>(id);
+  
+  /// Adds a new [Subtask] document with a new id and returns the created model with the id set
+  Future<Subtask> addSubtask(Subtask value) => $add<Subtask>(value);
+  
+  /// Sets the [Subtask] document with [id] atomically by getting first then setting.
+  Future<void> setSubtaskAtomic(String id, Subtask Function(Subtask?) txn) => $setAtomic<Subtask>(id, txn);
+  
+  /// Ensures that the [Subtask] document with [id] exists, if not it will be created with [or]
+  Future<void> ensureSubtaskExists(String id, Subtask or) => $ensureExists<Subtask>(id, or);
+  
+  /// Gets a model instance of [Subtask] bound with [id] that can be used to access child models 
+  /// without network io.
+  Subtask subtaskModel(String id) => $model<Subtask>(id);
+  
+  /// Modifies properties of the [Subtask] document with [id] atomically.
+  Future<void> modifySubtask({
+    required String id,
+    
+    /// Replaces the value of [title] with a new value atomically.
+    String? title,
+    
+    /// Removes the [title] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
+    bool deleteTitle = false,
+    
+    /// Changes (increment/decrement) [a] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
+    int? deltaA,
+    
+    /// Replaces the value of [a] with a new value atomically.
+    int? a,
+    
+    /// Removes the [a] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
+    bool deleteA = false,
+    
+    /// Changes (increment/decrement) [b] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
+    int? deltaB,
+    
+    /// Replaces the value of [b] with a new value atomically.
+    int? b,
+    
+    /// Removes the [b] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
+    bool deleteB = false,
+    
+    /// Changes (increment/decrement) [c] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
+    double? deltaC,
+    
+    /// Replaces the value of [c] with a new value atomically.
+    double? c,
+    
+    /// Removes the [c] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
+    bool deleteC = false,
+    
+    /// Changes (increment/decrement) [d] by an amount atomically using FieldValue.increment() see https://cloud.google.com/firestore/docs/manage-data/add-data#increment_a_numeric_value.
+    double? deltaD,
+    
+    /// Replaces the value of [d] with a new value atomically.
+    double? d,
+    
+    /// Removes the [d] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
+    bool deleteD = false,
+    
+    /// Replaces the value of [dt] with a new value atomically.
+    DateTime? dt,
+    
+    /// Removes the [dt] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
+    bool deleteDt = false,
+    
+    /// Replaces the value of [en] with a new value atomically.
+    En? en,
+    
+    /// Removes the [en] field from the document atomically using FieldValue.delete(). See https://cloud.google.com/firestore/docs/manage-data/delete-data#fields
+    bool deleteEn = false,
+    bool $z = false
+  }) =>
+    $update<Subtask>(id, { 
+      if(title != null) 'title': title,
+      if(deleteTitle) 'title': FieldValue.delete(),
+      if(a != null) 'a': a,
+      if(deltaA != null) 'a': FieldValue.increment(deltaA),
+      if(deleteA) 'a': FieldValue.delete(),
+      if(b != null) 'b': b,
+      if(deltaB != null) 'b': FieldValue.increment(deltaB),
+      if(deleteB) 'b': FieldValue.delete(),
+      if(c != null) 'c': c,
+      if(deltaC != null) 'c': FieldValue.increment(deltaC),
+      if(deleteC) 'c': FieldValue.delete(),
+      if(d != null) 'd': d,
+      if(deltaD != null) 'd': FieldValue.increment(deltaD),
+      if(deleteD) 'd': FieldValue.delete(),
+      if(dt != null) 'dt': dt.toIso8601String(),
+      if(deleteDt) 'dt': FieldValue.delete(),
+      if(en != null) 'en': en.name,
+      if(deleteEn) 'en': FieldValue.delete()
     });
 }
     

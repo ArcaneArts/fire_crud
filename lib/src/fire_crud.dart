@@ -5,15 +5,6 @@ import 'package:fire_crud/fire_crud.dart';
 /// Provides global access to the singleton instance of [RootFireCrud], which serves as the entry point for CRUD operations in the fire_crud package.
 RootFireCrud get $crud => RootFireCrud.instance();
 
-/// Creates a new [FireModel] instance configured with the specified collection name and optional exclusive document ID.
-///
-/// This factory function simplifies the instantiation of [FireModel] for artifact-based models, enabling quick setup for CRUD operations on Firestore documents.
-FireModel<T> fma<T extends ModelCrud>(String c, [String? e]) =>
-    FireModel<T>.artifact(
-      c,
-      exclusiveDocumentId: e,
-    );
-
 /// Singleton wrapper class for [FireCrud] that provides the root instance for the fire_crud package.
 ///
 /// [RootFireCrud] ensures a single, globally accessible instance of the CRUD operations manager, facilitating centralized management of Firestore models and their interactions.
