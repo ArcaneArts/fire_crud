@@ -1,3 +1,11 @@
+# 1.1.0
+* Performance improvements, sources generate 50% faster now (sometimes 300% faster)
+* Upgrade to the new analyzer, sourcegen system:
+    * build_runner 2.10.0
+    * build: ">=4.0.0 <5.0.0"
+    * source_gen: ">=4.0.0 <5.0.0"
+    * analyzer: ">=8.0.0 <9.0.0"
+
 # 1.0.5
 * Parent Models
 

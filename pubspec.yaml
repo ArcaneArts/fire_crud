@@ -14,5 +14,5 @@ dependencies:
   synchronized: '>=3.1.0 <4.0.0'
   artifact: ">=1.0.6 <2.0.0"
 dev_dependencies:
-  build_runner: ^2.4.15 
+  build_runner: ^2.4.15
   code_builder: ^4.10.0

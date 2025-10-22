@@ -47,8 +47,8 @@ List<_FieldInfo> fieldsOf(ClassElement cls) {
       final DartType dt = f.type;
       final Uri uri = importForType(dt, owningLib);
 
-      seen[f.name] = _FieldInfo(
-        f.name,
+      seen[f.name ?? ""] = _FieldInfo(
+        f.name ?? "",
         dt.getDisplayString(withNullability: true),
         uri,
         dt,
@@ -73,13 +73,13 @@ Uri importForType(DartType type, LibraryElement targetLib) {
   if (decl == null) return Uri(); // built‑in, needs no import
 
   final LibraryElement lib = decl.library!;
-  return identical(lib, targetLib) ? Uri() : lib.source.uri;
+  return identical(lib, targetLib) ? Uri() : lib.library.uri;
 }
 
 class ModelCrudPerFileBuilder implements Builder {
   Uri _computeImportUri(InterfaceType type, LibraryElement targetLib) {
     LibraryElement definingLib = type.element.library!;
-    Uri importUri = definingLib.source.uri; // eg. package:resilient_models/…
+    Uri importUri = definingLib.library.uri; // eg. package:resilient_models/…
     if (definingLib == targetLib) return Uri(); // empty = skip
     return importUri;
   }
@@ -89,7 +89,7 @@ class ModelCrudPerFileBuilder implements Builder {
     r'$lib$': <String>['gen/crud.gen.dart'],
   };
   static Glob $dartFilesInLib = Glob('lib/**.dart');
-  static final TypeChecker $artifactChecker = TypeChecker.fromRuntime(Artifact);
+  static final TypeChecker $artifactChecker = TypeChecker.typeNamed(Artifact);
 
   @override
   Future<void> build(BuildStep step) async {
@@ -111,8 +111,8 @@ class ModelCrudPerFileBuilder implements Builder {
         if (!_hasModelCrudMixin(cls)) continue;
 
         PropertyAccessorElement? childGetter = cls.lookUpGetter(
-          'childModels',
-          cls.library,
+          name: 'childModels',
+          library: cls.library,
         );
 
         if (childGetter == null) continue;
@@ -120,7 +120,7 @@ class ModelCrudPerFileBuilder implements Builder {
         allClasses.add(cls);
 
         AstNode? getterNode = await step.resolver.astNodeFor(
-          childGetter,
+          childGetter.firstFragment,
           resolve: true,
         );
         if (getterNode is! MethodDeclaration) continue;
@@ -155,11 +155,11 @@ class ModelCrudPerFileBuilder implements Builder {
 
         List<_ChildModelInfo> infos = childInfos[cls] ?? [];
 
-        imports.add("import '${cls.source.uri}';");
+        imports.add("import '${cls.library.uri}';");
 
         if ($artifactChecker.hasAnnotationOf(cls, throwOnUnresolved: false)) {
           imports.add(
-            "import '${cls.source.uri.replace(path: "${cls.source.uri.pathSegments[0]}/gen/artifacts.gen.dart")}';",
+            "import '${cls.library.uri.replace(path: "${cls.library.uri.pathSegments[0]}/gen/artifacts.gen.dart")}';",
           );
         }
 
@@ -252,7 +252,7 @@ class ModelCrudPerFileBuilder implements Builder {
     StringBuffer importsX = StringBuffer();
     List<String> imports = [];
 
-    String c = cls.name;
+    String c = cls.name ?? "";
     List<_FieldInfo> fields = fieldsOf(cls);
     (List<String>, List<String>, List<String>) mutate = mutateParams(
       fields,
@@ -260,7 +260,7 @@ class ModelCrudPerFileBuilder implements Builder {
     );
     imports.addAll(mutate.$1);
 
-    String t = cls.name;
+    String t = cls.name ?? "";
     String plural = '${t}s';
     List<_FieldInfo> fieldsC = fieldsOf(cls);
     (List<String>, List<String>, List<String>) mutateC = mutateParams(
@@ -338,7 +338,7 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
     StringBuffer importsX = StringBuffer();
     List<String> imports = [];
 
-    String c = cls.name;
+    String c = cls.name ?? "";
     List<_FieldInfo> fields = fieldsOf(cls);
     (List<String>, List<String>, List<String>) mutate = mutateParams(
       fields,
