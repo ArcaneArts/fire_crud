@@ -1,4 +1,7 @@
-# 1.1.0
+# 1.1.2
+* Added parentClassId and ClassId for self ids shorthand
+
+# 1.1.1
 * Faster generation output
 * Fixed duplication bug for parentClassModel
 

@@ -15,6 +15,10 @@ extension XFCrudBase$Task on Task {
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [Task] representing the new data
   Future<Task?> getCached() => getCachedSelfRaw<Task>();
   
+  String get taskId => documentId!;
+  
+  
+  
   
   
   /// Opens a self stream of [Task] representing this document
@@ -269,7 +273,11 @@ extension XFCrudBase$Subtask on Subtask {
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [Subtask] representing the new data
   Future<Subtask?> getCached() => getCachedSelfRaw<Subtask>();
   
+  String get subtaskId => documentId!;
+  
   Task get parentTaskModel => parentModel<Task>();
+  
+  String get parentTaskId => parentDocumentId!;
   
   /// Opens a self stream of [Subtask] representing this document
   Stream<Subtask?> stream() => streamSelfRaw<Subtask>();

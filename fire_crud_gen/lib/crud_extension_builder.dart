@@ -357,7 +357,12 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [$c] representing the new data
   Future<$c?> getCached() => getCachedSelfRaw<$c>();
   
+  /// Shorthand for documentId! Gets this instance id
+  String get ${cls.name!.substring(0, 1).toLowerCase()}${cls.name!.substring(1)}Id => documentId!;
+  
   ${parentClasses.map((i) => "${i.name} get parent${i.name}Model => parentModel<${i.name}>();").unique.join("\n  ")}
+  
+  ${parentClasses.map((i) => "String get parent${i.name}Id => parentDocumentId!;").unique.join("\n  ")}
   
   /// Opens a self stream of [$c] representing this document
   Stream<$c?> stream() => streamSelfRaw<$c>();
