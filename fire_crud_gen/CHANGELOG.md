@@ -1,4 +1,8 @@
 # 1.1.0
+* Faster generation output
+* Fixed duplication bug for parentClassModel
+
+# 1.1.0
 * Performance improvements, sources generate 50% faster now (sometimes 300% faster)
 * Upgrade to the new analyzer, sourcegen system:
     * build_runner 2.10.0

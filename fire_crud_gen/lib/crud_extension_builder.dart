@@ -7,6 +7,7 @@ import 'package:artifact/artifact.dart';
 import 'package:build/build.dart';
 import 'package:glob/glob.dart';
 import 'package:source_gen/source_gen.dart';
+import 'package:toxic/extensions/iterable.dart';
 import 'package:toxic/extensions/string.dart';
 
 class _FieldInfo {
@@ -144,6 +145,8 @@ class ModelCrudPerFileBuilder implements Builder {
       }
     }
 
+    List<Future<(String, String)>> work = [];
+
     await for (AssetId asset in step.findAssets($dartFilesInLib)) {
       if (!await step.resolver.isLibrary(asset)) continue;
       LibraryElement lib = await step.resolver.libraryFor(asset);
@@ -154,7 +157,6 @@ class ModelCrudPerFileBuilder implements Builder {
         if (!childInfos.containsKey(cls)) continue;
 
         List<_ChildModelInfo> infos = childInfos[cls] ?? [];
-
         imports.add("import '${cls.library.uri}';");
 
         if ($artifactChecker.hasAnnotationOf(cls, throwOnUnresolved: false)) {
@@ -163,14 +165,13 @@ class ModelCrudPerFileBuilder implements Builder {
           );
         }
 
-        (String, String) o = _genCrudExtensions(
-          cls,
-          infos,
-          childrenToParents[cls] ?? [],
-        );
-        imports.add(o.$1);
-        outLines.add(o.$2);
+        work.add(_genCrudExtensions(cls, infos, childrenToParents[cls] ?? []));
       }
+    }
+
+    for ((String, String) o in await Future.wait(work)) {
+      imports.add(o.$1);
+      outLines.add(o.$2);
     }
 
     List<ClassElement> roots =
@@ -329,11 +330,11 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
     return (importsX.toString(), b.toString());
   }
 
-  (String, String) _genCrudExtensions(
+  Future<(String, String)> _genCrudExtensions(
     ClassElement cls,
     List<_ChildModelInfo> infos,
     List<ClassElement> parentClasses,
-  ) {
+  ) async {
     StringBuffer b = StringBuffer();
     StringBuffer importsX = StringBuffer();
     List<String> imports = [];
@@ -348,7 +349,7 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
     imports.add("import 'package:fire_crud/fire_crud.dart';");
 
     b.writeln('''
-/// CRUD Extensions for ${cls.name}${parentClasses.isNotEmpty ? "\n/// Parent Model is ${parentClasses.map((i) => "[${i.name}]").join(" or ")}" : ""}
+/// CRUD Extensions for ${cls.name}${parentClasses.isNotEmpty ? "\n/// Parent Model is ${parentClasses.map((i) => "[${i.name}]").unique.join(" or ")}" : ""}
 extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Gets this document (self) live and returns a new instance of [$c] representing the new data
   Future<$c?> get() => getSelfRaw<$c>();
@@ -356,7 +357,7 @@ extension XFCrudBase\$${cls.name} on ${cls.name} {
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [$c] representing the new data
   Future<$c?> getCached() => getCachedSelfRaw<$c>();
   
-  ${parentClasses.map((i) => "${i.name} get parent${i.name}Model => parentModel<${i.name}>();").join("\n  ")}
+  ${parentClasses.map((i) => "${i.name} get parent${i.name}Model => parentModel<${i.name}>();").unique.join("\n  ")}
   
   /// Opens a self stream of [$c] representing this document
   Stream<$c?> stream() => streamSelfRaw<$c>();
