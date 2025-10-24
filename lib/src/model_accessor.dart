@@ -191,7 +191,7 @@ abstract class ModelAccessor {
   /// Adds a new document for type T using the provided [model], generating an ID.
   ///
   /// Returns the added instance of T with its generated ID. T extends [ModelCrud].
-  Future<T> $add<T extends ModelCrud>(T model);
+  Future<T> $add<T extends ModelCrud>(T model, {bool useULID = false});
 
   /// Retrieves all documents in the subcollection for type T, optionally filtered by [query].
   ///

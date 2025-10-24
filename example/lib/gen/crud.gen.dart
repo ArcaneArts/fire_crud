@@ -15,6 +15,7 @@ extension XFCrudBase$Task on Task {
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [Task] representing the new data
   Future<Task?> getCached() => getCachedSelfRaw<Task>();
   
+  /// Shorthand for documentId! Gets this instance id
   String get taskId => documentId!;
   
   
@@ -170,7 +171,7 @@ extension XFCrud$Task$Subtask on Task {
   Future<void> deleteSubtask(String id) => $delete<Subtask>(id);
   
   /// Adds a new [Subtask] inside [Task] document with a new id and returns the created model with the id set
-  Future<Subtask> addSubtask(Subtask value) => $add<Subtask>(value);
+  Future<Subtask> addSubtask(Subtask value, {bool useULID = false}) => $add<Subtask>(value, useULID: useULID);
   
   /// Sets the [Subtask] inside [Task] document with [id] atomically by getting first then setting.
   Future<void> setSubtaskAtomic(String id, Subtask Function(Subtask?) txn) => $setAtomic<Subtask>(id, txn);
@@ -273,6 +274,7 @@ extension XFCrudBase$Subtask on Subtask {
   /// Gets this document (self) live and caches it for the next time, returns a new instance of [Subtask] representing the new data
   Future<Subtask?> getCached() => getCachedSelfRaw<Subtask>();
   
+  /// Shorthand for documentId! Gets this instance id
   String get subtaskId => documentId!;
   
   Task get parentTaskModel => parentModel<Task>();
@@ -411,7 +413,7 @@ extension XFCrudRoot$Task on RootFireCrud {
   Future<void> deleteTask(String id) => $delete<Task>(id);
   
   /// Adds a new [Task] document with a new id and returns the created model with the id set
-  Future<Task> addTask(Task value) => $add<Task>(value);
+  Future<Task> addTask(Task value, {bool useULID = false}) => $add<Task>(value, useULID: useULID);
   
   /// Sets the [Task] document with [id] atomically by getting first then setting.
   Future<void> setTaskAtomic(String id, Task Function(Task?) txn) => $setAtomic<Task>(id, txn);

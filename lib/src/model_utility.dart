@@ -2,6 +2,7 @@ import 'package:collection_walker/collection_walker.dart';
 import 'package:fire_api/fire_api.dart';
 import 'package:fire_crud/fire_crud.dart';
 import 'package:toxic/extensions/iterable.dart';
+import 'package:ulid/ulid.dart';
 
 /// Utility class providing helper functions for operations on [FireModel] instances within the fire_crud package.
 ///
@@ -364,8 +365,18 @@ class ModelUtility {
       String collectionPath,
       List<FireModel> models,
       String Function(FireModel c, [String? id]) pathOf,
-      T model) async {
+      T model,
+      {bool useULID = false}) async {
     FireModel<T> c = selectChildModelCollectionByType<T>(models)!;
+
+    if (useULID) {
+      DocumentReference r = FirestoreDatabase.instance
+          .collection(collectionPath)
+          .doc(Ulid().toCanonical());
+      await r.set(c.toMap(model));
+      return c.cloneWithPath(pathOf(c, r.id), model);
+    }
+
     DocumentReference r = await FirestoreDatabase.instance
         .collection(collectionPath)
         .add(c.toMap(model));

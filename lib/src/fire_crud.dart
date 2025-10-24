@@ -199,11 +199,13 @@ class FireCrud extends ModelAccessor {
   /// @return A Future completing with the added model (updated with the generated ID).
   /// May throw Firestore exceptions on I/O errors.
   @override
-  Future<T> $add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
-      ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
-      $models,
-      $pathOf,
-      model);
+  Future<T> $add<T extends ModelCrud>(T model, {bool useULID = false}) =>
+      ModelUtility.add<T>(
+          ModelUtility.selectChildModelCollectionByType<T>($models)!.collection,
+          $models,
+          $pathOf,
+          model,
+          useULID: useULID);
 
   /// Deletes all documents in the collection for the specified model type, optionally filtered by a query.
   ///

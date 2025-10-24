@@ -305,7 +305,7 @@ extension XFCrudRoot\$${cls.name} on RootFireCrud {
   Future<void> delete$t(String id) => \$delete<$t>(id);
   
   /// Adds a new [$t] document with a new id and returns the created model with the id set
-  Future<$t> add$t($t value) => \$add<$t>(value);
+  Future<$t> add$t($t value, {bool useULID = false}) => \$add<$t>(value, useULID: useULID);
   
   /// Sets the [$t] document with [id] atomically by getting first then setting.
   Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);
@@ -481,7 +481,7 @@ extension XFCrud\$${cls.name}\$$t on ${cls.name} {
   Future<void> delete$t(String id) => \$delete<$t>(id);
   
   /// Adds a new [$t] inside [${cls.name}] document with a new id and returns the created model with the id set
-  Future<$t> add${t}($t value) => \$add<$t>(value);
+  Future<$t> add$t($t value, {bool useULID = false}) => \$add<$t>(value, useULID: useULID);
   
   /// Sets the [$t] inside [${cls.name}] document with [id] atomically by getting first then setting.
   Future<void> set${t}Atomic(String id, $t Function($t?) txn) => \$setAtomic<$t>(id, txn);

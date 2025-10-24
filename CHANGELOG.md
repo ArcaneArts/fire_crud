@@ -1,3 +1,6 @@
+# 3.1.14
+* Support for adding documents using ULID ids
+
 # 3.1.13
 * Fixes FireModel<T>.artifact("collection")
 

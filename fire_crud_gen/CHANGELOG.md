@@ -1,3 +1,6 @@
+# 1.1.3
+* Support for ULID gen
+
 # 1.1.2
 * Added parentClassId and ClassId for self ids shorthand
 

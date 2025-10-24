@@ -171,11 +171,13 @@ mixin ModelCrud implements ModelAccessor, PylonCodec<ModelCrud> {
   /// with the added model.
   /// Throws a [FirestoreException] if addition fails.
   @override
-  Future<T> $add<T extends ModelCrud>(T model) => ModelUtility.add<T>(
-      "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
-      $models,
-      $pathOf,
-      model);
+  Future<T> $add<T extends ModelCrud>(T model, {bool useULID = false}) =>
+      ModelUtility.add<T>(
+          "$documentPath/${ModelUtility.selectChildModelCollectionByType<T>($models)!.collection}",
+          $models,
+          $pathOf,
+          model,
+          useULID: useULID);
 
   /// Deletes all child models of type T matching the optional query.
   ///
